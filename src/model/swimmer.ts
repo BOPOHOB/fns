@@ -1,0 +1,3 @@
+class Swimmer {}
+
+export { Swimmer };

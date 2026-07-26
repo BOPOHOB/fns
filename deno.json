@@ -1,0 +1,17 @@
+{
+  "name": "feelandswim-backend",
+  "imports": {
+    "hono": "jsr:@hono/hono@^4.11.4",
+    "@types/": "./src/types/",
+    "@shared/": "./src/shared/"
+  },
+  "exports": "./src/backend/main.ts",
+  "tasks": {
+    "backend": "deno run -A src/backend/main.ts",
+    "backend:dev": "deno run -A --watch src/backend/main.ts"
+  },
+  "compilerOptions": {
+    "strict": true,
+    "lib": ["deno.window", "deno.ns"]
+  }
+}

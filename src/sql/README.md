@@ -79,10 +79,10 @@ PRAGMA foreign_keys = ON;
 ## Сущности
 
 ### swimmer
-Пловец: имя, дата рождения, пол (`male` / `female`), публичные и приватные заметки.
+Пловец: имя, дата рождения, пол (`male` / `female`), роль (`user` / `trainer`), опциональный `yandex_login`, публичные и приватные заметки. Уникальный индекс по `yandex_login` (где не NULL).
 
 ### team
-Группа: название, тренер, заметки, расписание `slots` — JSON-массив строк вида `mon 19:45-21:15`.
+Группа: название, `trainer_id` → `swimmer.id` (`ON DELETE SET NULL`), заметки, расписание `slots` — JSON-массив строк вида `mon 19:45-21:15`.
 
 ### swimmer_team
 Связь many-to-many. Составной PK `(swimmer_id, team_id)`, `WITHOUT ROWID`, каскадное удаление с обеих сторон. Один пловец может быть в нескольких группах.
@@ -106,7 +106,7 @@ PRAGMA foreign_keys = ON;
 
 | Удаление | Что удалится вместе |
 |---|---|
-| пловец | его `result`, строки в `swimmer_team` |
+| пловец | его `result`, строки в `swimmer_team`; у групп `trainer_id` → `NULL` |
 | группа | строки в `swimmer_team` (пловцы и их результаты остаются) |
 | серия | все `result` с этим `series_id` |
 

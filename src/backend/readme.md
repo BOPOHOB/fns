@@ -9,36 +9,63 @@
 deno task backend          # http://127.0.0.1:8787
 deno task backend:dev      # то же + --watch
 
-# опционально
-DB_PATH=/path/to/data.db PORT=8787 deno task backend
+# OAuth (Яндекс ID) — Redirect URI на фронте
+export YANDEX_CLIENT_ID=...
+export YANDEX_CLIENT_SECRET=...
+export FRONTEND_ORIGIN=http://localhost:5173
+export OAUTH_REDIRECT_URI=http://localhost:5173/auth/callback
+# опционально: HOST, PORT, DB_PATH, COOKIE_SECURE=true
+deno task backend
 ```
 
-По умолчанию `DB_PATH` = `../fns/data.db` относительно корня feelAndSwim.
+По умолчанию `OAUTH_REDIRECT_URI` = `{FRONTEND_ORIGIN}/auth/callback`, `DB_PATH` = `../fns/data.db`.
 
-Типы API — из `src/types`, общие хелперы (дистанции) — из `src/shared`. При каждом открытии БД включается `PRAGMA foreign_keys = ON`.
+Типы API — из `src/types`, общие хелперы — из `src/shared`. При open БД: `PRAGMA foreign_keys = ON`.
 
-Авторизация будет осуществляться через OAuth (позже).
+Авторизация — **Yandex OAuth**: callback на **React**, обмен `code` на бэке, токены в httpOnly cookies `access` / `refresh`.
 
 ## Публичные GET (без auth)
 
 | Метод | Путь | Описание |
 |-------|------|----------|
-| GET | `/api/health` | liveness |
+| GET | `/api/health` | liveness (`authConfigured`) |
 | GET | `/api/swimmers` | список пловцов (`PublicSwimmer`, без `privateNotes`) |
 | GET | `/api/swimmers/:id` | один пловец |
 | GET | `/api/teams` | список групп |
 | GET | `/api/teams/:id` | одна группа |
 | GET | `/api/series` | список серий |
 | GET | `/api/series/:id` | одна серия |
-| GET | `/api/results` | результаты; query: `swimmerId`, `teamId`, `seriesId`, `from`, `to` (даты) |
+| GET | `/api/results` | фильтры: `swimmerId`, `teamId`, `seriesId`, `from`, `to` |
 | GET | `/api/results/:id` | один результат |
 
-Ответы в camelCase, дистанции как `DistanceName` (`25m`…`2ml`), `slots`/`stages` — распарсенный JSON.
+## Auth (всё под `/api`)
+
+| Метод | Путь | Описание |
+|-------|------|----------|
+| GET | `/api/auth/login` | `{ authorizeUrl, state, redirectUri, clientId }` — без redirect |
+| POST | `/api/auth/exchange` | body `{ code }` → Set-Cookie + `{ ok, user }` |
+| POST | `/api/auth/logout` | сброс cookies → `{ ok: true }` |
+| GET | `/api/me` | `{ user }` или `{ user: null }` — без redirect на OAuth |
+
+В кабинете Яндекса Redirect URI = `OAUTH_REDIRECT_URI` (страница React).
+
+CORS: `credentials: true`, origin = `FRONTEND_ORIGIN`.
+
+### Контракт для фронта
+
+Реализовано в `src/api/auth.ts`, `src/pages/AuthCallback.tsx`, `Session`.
+
+Vite proxy: `/api` → `http://127.0.0.1:8787` (same-origin cookies).  
+`FRONTEND_ORIGIN=http://localhost:5173`,  
+`OAUTH_REDIRECT_URI=http://localhost:5173/auth/callback`.
+
+1. `GET /api/auth/login` → `sessionStorage` + redirect на Яндекс  
+2. `/auth/callback` → проверка state → `POST /api/auth/exchange`  
+3. `GET /api/me` при старте `Session`  
+4. `POST /api/auth/logout`
+
+Типы: `src/types/auth.ts`.
 
 ## Чтение и модификация данных
 
-У нас 4 сущности: пловцы (`swimmer`), серии (`series`), результаты (`result`) и группы (`team`). Все описаны в `src/types`. На проекте должен быть SSR и быстрая загрузка начальных данных через отдельные списковые ручки. После загрузки главной страницы фронтенд отдельно сходит в `/api/me` и решит, авторизован ли человек.
-
-Публичные списки должны отдаваться быстро; проверка авторизации и мутации могут зависеть от OAuth и работать медленнее.
-
-Мутации, OAuth и `privateNotes` по пловцу — следующие шаги, пока не реализованы.
+Публичные списки — быстро и анонимно. После загрузки главной фронт ходит в `/api/me`. Мутации (позже) — те же cookies; `privateNotes` — отдельная auth-ручка, пока нет.

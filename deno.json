@@ -8,7 +8,7 @@
   "exports": "./src/backend/main.ts",
   "tasks": {
     "backend": "deno run -A src/backend/main.ts",
-    "backend:dev": "deno run -A --watch src/backend/main.ts"
+    "backend:dev": "deno run -A --env-file=.env --watch src/backend/main.ts"
   },
   "compilerOptions": {
     "strict": true,

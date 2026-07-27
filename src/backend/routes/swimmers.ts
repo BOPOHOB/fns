@@ -21,7 +21,7 @@ export function swimmersRoutes(db: Db) {
   app.get('/', (c) => {
     const rows = db
       .prepare(
-        `SELECT id, name, birth_date, sex, notes
+        `SELECT id, name, birth_date, sex, role, notes
          FROM swimmer
          ORDER BY name COLLATE NOCASE`,
       )
@@ -36,7 +36,7 @@ export function swimmersRoutes(db: Db) {
 
     const row = db
       .prepare(
-        `SELECT id, name, birth_date, sex, notes
+        `SELECT id, name, birth_date, sex, role, notes
          FROM swimmer WHERE id = ?`,
       )
       .get(id) as SwimmerRow | undefined;

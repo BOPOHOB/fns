@@ -8,7 +8,7 @@ export function teamsRoutes(db: Db) {
   app.get('/', (c) => {
     const rows = db
       .prepare(
-        `SELECT id, name, slots, trainer, notes
+        `SELECT id, name, slots, trainer_id, notes
          FROM team
          ORDER BY name COLLATE NOCASE`,
       )
@@ -22,7 +22,7 @@ export function teamsRoutes(db: Db) {
 
     const row = db
       .prepare(
-        `SELECT id, name, slots, trainer, notes
+        `SELECT id, name, slots, trainer_id, notes
          FROM team WHERE id = ?`,
       )
       .get(id) as TeamRow | undefined;

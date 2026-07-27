@@ -9,6 +9,7 @@ export type SwimmerRow = {
   name: string;
   birth_date: string | null;
   sex: 'male' | 'female';
+  role: 'user' | 'trainer';
   notes: string;
 };
 
@@ -16,7 +17,7 @@ export type TeamRow = {
   id: number;
   name: string;
   slots: string;
-  trainer: string;
+  trainer_id: number | null;
   notes: string;
 };
 
@@ -47,6 +48,7 @@ export function mapSwimmer(row: SwimmerRow, teamId: number[]): PublicSwimmer {
     teamId,
     name: row.name,
     sex: row.sex,
+    role: row.role,
     notes: row.notes,
   };
   const birthDate = row.birth_date?.slice(0, 10);
@@ -66,7 +68,7 @@ export function mapTeam(row: TeamRow): Team {
     id: row.id,
     name: row.name,
     slots,
-    trainer: row.trainer,
+    trainerId: row.trainer_id,
     notes: row.notes,
   };
 }

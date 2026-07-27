@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS "team" (
   "id" INTEGER NOT NULL UNIQUE,
   "name" TEXT NOT NULL DEFAULT '',
   "slots" TEXT NOT NULL DEFAULT '[]',
-  "trainer" TEXT NOT NULL,
+  "trainer_id" INTEGER REFERENCES "swimmer"("id") ON DELETE SET NULL,
   "notes" TEXT NOT NULL DEFAULT '',
   PRIMARY KEY ("id" AUTOINCREMENT)
 );

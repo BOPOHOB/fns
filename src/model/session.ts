@@ -1,4 +1,4 @@
-import { observable } from 'mobx';
+import { action, computed, makeObservable, observable, runInAction } from 'mobx';
 import { createContext, useContext } from 'react';
 import type { AuthUser } from '../types/auth.ts';
 import {
@@ -7,32 +7,22 @@ import {
   logoutRequest,
   startYandexLogin,
 } from '../api/auth.ts';
-import type { Result } from './result';
-import type { Swimmer } from './swimmer';
-import type { ResultSeries } from './resultSeries';
-import type { Team } from './team';
-
-const getData = () => Promise.resolve();
 
 class Session {
-  results = observable.array<Result>();
-  swimmers = observable.array<Swimmer>();
-  series = observable.array<ResultSeries>();
-  teams = observable.array<Team>();
-
   #isLoading = observable.box(true);
-  #isAuthLoading = observable.box(true);
-  #user = observable.box<AuthUser | null>(null);
+  #user = observable.box<AuthUser | null | undefined>();
   #authError = observable.box<string | null>(null);
 
   constructor() {
-    getData()
-      .then(() => {})
-      .finally(() => {
-        this.#isLoading.set(false);
-      });
-
     void this.loadMe();
+
+    makeObservable(this, {
+      loadMe: action,
+      isAuthLoading: computed,
+      user: computed,
+      authError: computed,
+      isAuthenticated: computed,
+    });
   }
 
   get isLoading() {
@@ -40,73 +30,77 @@ class Session {
   }
 
   get isAuthLoading() {
-    return this.#isAuthLoading.get();
+    return this.#user.get() === undefined;
   }
 
   get user() {
     return this.#user.get();
   }
 
+  private set user(value: AuthUser | null) {
+    runInAction(() => {
+      this.#user.set(value);
+    });
+  }
+
   get authError() {
     return this.#authError.get();
+  }
+
+  private set authError(value: string | null) {
+    runInAction(() => {
+      this.#authError.set(value);
+    });
   }
 
   get isAuthenticated() {
     return this.#user.get() !== null;
   }
 
-  clearAuthError() {
-    this.#authError.set(null);
+  readonly clearAuthError = () => {
+    this.authError = null;
   }
 
   setAuthError(message: string) {
-    this.#authError.set(message);
+    this.authError = message;
   }
 
   async loadMe() {
-    this.#isAuthLoading.set(true);
     try {
-      const user = await fetchMe();
-      this.#user.set(user);
+      this.user = await fetchMe();
     } catch (e) {
-      this.#user.set(null);
-      this.#authError.set(e instanceof Error ? e.message : 'Не удалось проверить сессию');
-    } finally {
-      this.#isAuthLoading.set(false);
+      this.user = null;
+      this.authError = e instanceof Error ? e.message : 'Не удалось проверить сессию';
     }
   }
 
   async login() {
-    this.#authError.set(null);
+    this.authError = null;
     try {
       await startYandexLogin();
     } catch (e) {
-      this.#authError.set(e instanceof Error ? e.message : 'Не удалось начать вход');
+      this.authError = e instanceof Error ? e.message : 'Не удалось начать вход';
     }
   }
 
   async completeExchange(code: string) {
-    this.#isAuthLoading.set(true);
-    this.#authError.set(null);
+    this.authError = null;
     try {
-      const user = await exchangeCode(code);
-      this.#user.set(user);
+      this.user = await exchangeCode(code);
     } catch (e) {
-      this.#user.set(null);
-      this.#authError.set(e instanceof Error ? e.message : 'Обмен кода не удался');
+      this.user = null;
+      this.authError = e instanceof Error ? e.message : 'Обмен кода не удался';
       throw e;
-    } finally {
-      this.#isAuthLoading.set(false);
     }
   }
 
   async logout() {
-    this.#authError.set(null);
+    this.authError = null;
     try {
       await logoutRequest();
-      this.#user.set(null);
+      this.user = null;
     } catch (e) {
-      this.#authError.set(e instanceof Error ? e.message : 'Не удалось выйти');
+      this.authError = e instanceof Error ? e.message : 'Не удалось выйти';
     }
   }
 }

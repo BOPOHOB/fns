@@ -11,7 +11,7 @@ let callbackHandled = false;
  * Redirect URI Яндекса: /auth/callback?code=&state=
  * Проверяет state, шлёт code на бэк, уходит на /.
  */
-const AuthCallback = observer(function AuthCallback() {
+const AuthCallback = observer(() => {
   const session = useSession();
   const navigate = useNavigate();
 

@@ -1,4 +1,4 @@
-import { observable, runInAction, transaction } from "mobx";
+import { computed, makeObservable, observable, runInAction, transaction } from "mobx";
 import { Result } from './result';
 import { Swimmer } from './swimmer';
 import { ResultSeries } from './resultSeries';
@@ -11,7 +11,7 @@ class Results {
   swimmers = observable.array<Swimmer>();
   series = observable.array<ResultSeries>();
   teams = observable.array<Team>();
-  isLoading = observable.box(true);
+  isLoading = true;
 
   constructor() {
     getResults().then(({
@@ -20,12 +20,31 @@ class Results {
       series,
       teams,
     }) => runInAction(() => transaction(() => {
-      this.isLoading.set(false);
+      this.isLoading = false;
       this.results.replace(results.map((json) => new Result(json, this)));
       this.swimmers.replace(swimmers.map((json) => new Swimmer(json, this)));
       this.series.replace(series.map((json) => new ResultSeries(json, this)));
       this.teams.replace(teams.map((json) => new Team(json, this)));
     })));
+
+    makeObservable(this, {
+      isLoading: observable,
+      swimmersMap: computed,
+      lader: computed,
+    });
+  }
+
+  get swimmersMap() {
+    return new Map(this.swimmers.map((swimmer) => [swimmer.id, swimmer]));
+  } 
+
+  get lader() {
+    return this.results.slice().sort((a, b) => a.result - b.result).map(result => result.swimmer);
+  }
+
+  get distances() {
+    const set = new Set(this.results.map((result) => result.distance));
+    return [...set.values()].sort();
   }
 }
 

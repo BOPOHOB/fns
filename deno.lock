@@ -24,6 +24,7 @@
         "npm:antd@^6.5.1",
         "npm:babel-plugin-react-compiler@1",
         "npm:d3@^7.9.0",
+        "npm:less@^4.8.0",
         "npm:mobx-react@^9.2.2",
         "npm:mobx@^6.16.1",
         "npm:oxlint@^1.71.0",

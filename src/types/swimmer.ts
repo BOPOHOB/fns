@@ -1,5 +1,7 @@
 type SwimmerRole = 'user' | 'trainer';
 
+type Sex = 'male' | 'female';
+
 type Swimmer = {
   id: number;
   // Группы, в которые ходит пловец
@@ -7,7 +9,7 @@ type Swimmer = {
   name: string;
   // YYYY-MM-DD
   birthDate?: string;
-  sex: 'male' | 'female';
+  sex: Sex;
   role: SwimmerRole;
   /** Логин Яндекса; не отдаётся в публичном API */
   yandexLogin?: string;
@@ -18,4 +20,4 @@ type Swimmer = {
 /** Публичное представление пловца (без privateNotes и yandexLogin). */
 type PublicSwimmer = Omit<Swimmer, 'privateNotes' | 'yandexLogin'>;
 
-export type { Swimmer, PublicSwimmer, SwimmerRole };
+export type { Swimmer, PublicSwimmer, SwimmerRole, Sex };

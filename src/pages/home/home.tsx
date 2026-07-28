@@ -6,12 +6,11 @@ import { useResults } from '../../model/results';
 const Home = observer(() => {
   const columns = useColumns();
   const results = useResults();
-
-  if (results.isLoading)
+  const rows = results.swimmers.map((swimmer) => swimmer.row);
 
   return (
-    <Spin spinning={results.isLoading.get()}>
-      <Table columns={columns} dataSource={results.swimmers} />
+    <Spin spinning={results.isLoading}>
+      <Table columns={columns} dataSource={rows} />
     </Spin>
   );
 });

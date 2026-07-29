@@ -1,4 +1,4 @@
-import { Outlet } from "react-router";
+import { Link, Outlet } from "react-router";
 
 import cn from "./loginOutline.module.less";
 import { useSession } from "../model/session";
@@ -6,11 +6,19 @@ import { Avatar, Button, Space } from "antd";
 import Text from "antd/es/typography/Text";
 import { observer } from "mobx-react";
 
+import logo from './logo.jpg';
+
 const LoginOutline = observer(() => {
   const session = useSession();
   return (
     <>
       <header className={cn.head}>
+        <nav>
+          <Link to="/"><img src={logo} alt="logo" /></Link>
+          {
+            session.isTrainer && (<Link to="/series">Серия</Link>)
+          }
+        </nav>
         {session.authError ? (
           <Space orientation="vertical" size={8}>
             <Text type="danger">{session.authError}</Text>

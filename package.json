@@ -11,6 +11,7 @@
     "agent": "agent --resume=6ace765c-5efd-409e-954f-c211ddcb2177"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.3.2",
     "antd": "^6.5.1",
     "d3": "^7.9.0",
     "dayjs": "^1.11.21",

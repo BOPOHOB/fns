@@ -22,7 +22,12 @@ class Session {
       user: computed,
       authError: computed,
       isAuthenticated: computed,
+      isTrainer: computed,
     });
+  }
+
+  get isTrainer() {
+    return this.#user.get()?.swimmerId;
   }
 
   get isLoading() {

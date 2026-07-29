@@ -77,6 +77,7 @@ class Swimmer {
   get row() {
     return {
       key: this.key,
+      id: this.id,
       name: this.name,
       sexTooltip: this.sexTooltip,
       sexEmoji: this.sexEmoji,

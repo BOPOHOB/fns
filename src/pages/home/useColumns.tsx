@@ -1,20 +1,37 @@
 import type { ColumnsType } from "antd/es/table";
-import { Tooltip } from "antd";
+import { Button, Tooltip } from "antd";
 import { useResults } from "../../model/results";
 import { useMemo } from "react";
+import { Link, useNavigate } from "react-router";
+import type { Swimmer } from "../../model/swimmer";
+import { useSession } from "../../model/session";
+import { PlusOutlined } from "@ant-design/icons";
 
-const useColumns = (): ColumnsType<any> => {
+import cn from './columns.module.less';
+
+const useColumns = (): ColumnsType<Swimmer["row"]> => {
   const results = useResults();
+  const session = useSession();
+  const navigate = useNavigate();
   return useMemo(() => [
     {
       title: 'Пловец',
       dataIndex: 'name',
       key: 'name',
+      className: cn.name,
+      width: 200,
+      render: (name, swimmer) => [
+        <Link className={cn.text} key="name" to={`/${swimmer.id}`}>{name}</Link>,
+        session.isTrainer && (
+          <Button className={cn.add} size="small" key="add" onClick={() => navigate(`/${swimmer.id}/add`)} icon={<PlusOutlined />} />
+        )
+      ],
     },
     {
       title: '',
       dataIndex: 'sexEmoji',
       key: 'sexEmoji',
+      width: 20,
       render: (sexEmoji, swimmer) => {
         const tooltip = swimmer.sexTooltip;
         if (tooltip) {
@@ -33,7 +50,7 @@ const useColumns = (): ColumnsType<any> => {
       dataIndex: distance,
       key: distance,
     }))
-  ], [results.isLoading]);
+  ], [results.isLoading, session.isTrainer]);
 };
 
 export { useColumns };

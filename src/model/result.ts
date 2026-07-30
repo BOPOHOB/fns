@@ -1,4 +1,5 @@
-import type { Result as ResultJSON } from "../types/result";
+import dayjs from "dayjs";
+import type { ResultCondition, Result as ResultJSON } from "../types/result";
 import type { Results } from "./results";
 
 class Result {
@@ -14,6 +15,25 @@ class Result {
 
   get distance() {
     return this.data.distance;
+  }
+
+  get swimmerId() {
+    return this.data.swimmerId;
+  }
+
+  get fifty() {
+    return this.data.water === "fifty";
+  }
+
+  get date() {
+    return dayjs(this.data.date);
+  }
+
+  get condition(): ResultCondition | 'open' {
+    if (this.data.water === 'open') {
+      return 'open';
+    }
+    return this.data.type
   }
 
   get swimmer() {

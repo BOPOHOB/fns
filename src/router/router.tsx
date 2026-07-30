@@ -4,7 +4,10 @@ import { useModel } from '../utils/useModel.ts';
 import { AuthCallback } from '../pages/AuthCallback.tsx';
 import { LoginOutline } from './loginOutline.tsx';
 import { Results, ResultsProvider } from '../model/results.ts';
-import { Home } from '../pages/home/Home.tsx';
+import { AddResult } from '../pages/addResult/addResult.tsx';
+import { Swimmer } from '../pages/swimmer/swimmer.tsx';
+import { SwimmerOutline } from './swimmerOutline.tsx';
+import { Home } from '../pages/home/home.tsx';
 
 function Router() {
   const session = useModel(() => new Session());
@@ -21,6 +24,10 @@ function Router() {
           <Routes>
             <Route element={<LoginOutline />}>
               <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/:swimmerId" element={<SwimmerOutline />}>
+                <Route element={<AddResult />} path="/:swimmerId/add" />
+                <Route element={<Swimmer />} path="/:swimmerId" />
+              </Route>
               <Route path="*" element={<Home />} />
             </Route>
           </Routes>

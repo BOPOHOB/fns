@@ -110,3 +110,39 @@ export async function completeAuthWithCode(
   setTokenCookies(c, config, tokens);
   return withSwimmerId(db, await fetchYandexUser(tokens.accessToken));
 }
+
+/**
+ * Авторизованный пользователь с ролью не `user` (не пловец).
+ * Тренеры и будущие роли — ок; пловцы и несвязанные аккаунты — 403.
+ */
+export async function resolveNonSwimmerUser(
+  c: Context,
+  config: AuthConfig | null,
+  db: Db,
+): Promise<
+  | { ok: true; user: AuthUser }
+  | { ok: false; status: 401 | 403 | 503; error: string }
+> {
+  if (!config) {
+    return { ok: false, status: 503, error: 'Auth is not configured' };
+  }
+
+  const user = await resolveAuthUser(c, config, db);
+  if (!user) {
+    return { ok: false, status: 401, error: 'Unauthorized' };
+  }
+
+  if (user.swimmerId == null) {
+    return { ok: false, status: 403, error: 'Forbidden' };
+  }
+
+  const row = db
+    .prepare(`SELECT role FROM swimmer WHERE id = ?`)
+    .get(user.swimmerId) as { role: string } | undefined;
+
+  if (!row || row.role === 'user') {
+    return { ok: false, status: 403, error: 'Forbidden' };
+  }
+
+  return { ok: true, user };
+}

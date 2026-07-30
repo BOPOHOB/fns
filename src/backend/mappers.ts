@@ -2,7 +2,6 @@ import type { PublicSwimmer } from '../types/swimmer.ts';
 import type { Team } from '../types/team.ts';
 import type { Result, ResultCondition, WaterType } from '../types/result.ts';
 import type { ResultSeries } from '../types/resultSeries.ts';
-import { metersToDistance } from '../shared/distances.ts';
 
 export type SwimmerRow = {
   id: number;
@@ -74,11 +73,6 @@ export function mapTeam(row: TeamRow): Team {
 }
 
 export function mapResult(row: ResultRow): Result {
-  const distance = metersToDistance(row.distance);
-  if (!distance) {
-    throw new Error(`Unknown distance meters: ${row.distance}`);
-  }
-
   let stages: Result['stages'] = [];
   try {
     const parsed = JSON.parse(row.stages);
@@ -91,7 +85,7 @@ export function mapResult(row: ResultRow): Result {
     id: row.id,
     swimmerId: row.swimmer_id,
     result: row.result,
-    distance,
+    distance: row.distance,
     date: row.date,
     type: row.type as ResultCondition,
     water: row.water as WaterType,

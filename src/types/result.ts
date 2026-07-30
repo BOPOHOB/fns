@@ -19,6 +19,12 @@ type DistanceName =
 type ResultCondition = 'competition' | 'test' | 'workout';
 // тип заплыва - открытая вода/25м бассейн или 50м бассейн
 type WaterType = 'quarter' | 'fifty' | 'open';
+
+type Stages = Array<{
+  result: number;
+  // при замере этапов разбивки могут быть не равномерными, в бассейне круги тренер может пропускать а в открытой воде промежуточный замер скорости может ставиться случайно
+  distance: number;
+}>;
   
 type Result = {
   id: number;
@@ -26,18 +32,14 @@ type Result = {
   seriesId?: number;
   // Всегда в секундах
   result: number;
-  distance: DistanceName;
-  // Дата и время в формате SQLite datetime: YYYY-MM-DD HH:MM:SS
+  distance: number;
+  // ISO 8601 (например 2024-07-30T10:15:00.000Z); Z = UTC
   // Дату выставляет фронтенд. Это может быть как добавление постфактум так и заполнение серии на лету — тогда момент с точностью до секунд определяет место результата в серии.
   date: string;
   type: ResultCondition;
   water: WaterType;
-  stages: Array<{
-    result: number;
-    // при замере этапов разбивки могут быть не равномерными, в бассейне круги тренер может пропускать а в открытой воде промежуточный замер скорости может ставиться случайно
-    distance: number;
-  }>;
+  stages: Stages;
   notes: string;
 };
 
-export type { DistanceName, ResultCondition, WaterType, Result };
+export type { DistanceName, ResultCondition, WaterType, Result, Stages };

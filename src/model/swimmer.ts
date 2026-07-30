@@ -18,6 +18,8 @@ class Swimmer {
       sexEmoji: computed,
       sexTooltip: computed,
       age: computed,
+      row: computed,
+      results: computed
     });
   }
 
@@ -74,7 +76,20 @@ class Swimmer {
     return tooltip[this.sex];
   }
 
+  get results() {
+    return this.#model.deref().results.filter((result) => result.swimmerId === this.id);
+  }
+
   get row() {
+    const results = {};
+
+    for (const result of this.results) {
+      if (!results[result.distance]) {
+        results[result.distance] = [];
+      }
+      results[result.distance].push(result);
+    }
+
     return {
       key: this.key,
       id: this.id,
@@ -82,6 +97,7 @@ class Swimmer {
       sexTooltip: this.sexTooltip,
       sexEmoji: this.sexEmoji,
       age: this.age,
+      ...results,
     };
   }
 }

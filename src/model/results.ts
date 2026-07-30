@@ -1,5 +1,6 @@
-import { computed, makeObservable, observable, runInAction, transaction } from "mobx";
+import { action, computed, makeObservable, observable, runInAction, transaction } from "mobx";
 import { Result } from './result';
+import type { Result as ResultRawData } from '../types/result';
 import { Swimmer } from './swimmer';
 import { ResultSeries } from './resultSeries';
 import { Team } from './team';
@@ -31,6 +32,9 @@ class Results {
       isLoading: observable,
       swimmersMap: computed,
       lader: computed,
+      addResult: action,
+      distances: computed,
+      summaryTableRows: computed,
     });
   }
 
@@ -44,7 +48,15 @@ class Results {
 
   get distances() {
     const set = new Set(this.results.map((result) => result.distance));
-    return [...set.values()].sort();
+    return [...set.values()].sort((a, b) => a - b);
+  }
+
+  get summaryTableRows() {
+    return this.swimmers.map(({ row }) => row);
+  }
+
+  addResult(data: ResultRawData) {
+    this.results.push(new Result(data, this));
   }
 }
 

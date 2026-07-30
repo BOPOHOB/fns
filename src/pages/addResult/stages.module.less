@@ -1,0 +1,26 @@
+ul.layout {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .alert {
+      padding: 4px 8px;
+    }
+
+    .rate {
+      padding: 4px 8px;
+
+      :global(.ant-alert-title) {
+        display: flex;
+        align-items: center;
+        width: 60px;
+      }
+    }
+  }
+}

@@ -17,4 +17,10 @@ const getResults = () => Promise.all([
     results,
     series}));
 
-export { getResults };
+const submitResult = (result: Omit<Result, 'id'>) =>
+  apiFetch<Result>('/api/results', {
+    method: 'POST',
+    body: JSON.stringify(result),
+  });
+
+export { getResults, submitResult };

@@ -19,14 +19,6 @@ const LoginOutline = observer(() => {
             session.isTrainer && (<Link to="/series">Серия</Link>)
           }
         </nav>
-        {session.authError ? (
-          <Space orientation="vertical" size={8}>
-            <Text type="danger">{session.authError}</Text>
-            <Button type="link" onClick={() => session.clearAuthError()} style={{ padding: 0 }}>
-              закрыть
-            </Button>
-          </Space>
-        ) : null}
 
         {session.isAuthLoading ? (
           <Text type="secondary">Проверка сессии…</Text>
@@ -46,7 +38,16 @@ const LoginOutline = observer(() => {
           </Button>
         )}
       </header>
-      <Outlet />
+
+      {session.authError ? (
+          <Space orientation="vertical" size={8}>
+            <Text type="danger">{session.authError}</Text>
+            <Button type="link" onClick={() => session.clearAuthError()} style={{ padding: 0 }}>
+              закрыть
+            </Button>
+          </Space>
+        ) : <Outlet />
+      }
     </>
   );
 });

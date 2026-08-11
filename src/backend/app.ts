@@ -36,8 +36,8 @@ export function createApp(db: Db) {
   app.route('/api/auth', authRoutes(authConfig, db));
   app.route('/api/me', meRoutes(authConfig, db));
 
-  app.route('/api/swimmers', swimmersRoutes(db));
-  app.route('/api/teams', teamsRoutes(db));
+  app.route('/api/swimmers', swimmersRoutes(db, authConfig));
+  app.route('/api/teams', teamsRoutes(db, authConfig));
   app.route('/api/results', resultsRoutes(db, authConfig));
   app.route('/api/series', seriesRoutes(db, authConfig));
 

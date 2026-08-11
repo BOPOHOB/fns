@@ -2,5 +2,10 @@
   "cSpell.language": "en,ru",
   "deno.enable": true,
   "deno.config": "./deno.json",
-  "deno.enablePaths": ["src/backend"]
+  "deno.enablePaths": [
+    "src/backend"
+  ],
+  "cSpell.words": [
+    "Popconfirm"
+  ]
 }

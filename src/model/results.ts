@@ -5,6 +5,8 @@ import { ResultSeries } from './resultSeries';
 import { Team } from './team';
 import { createContext, useContext } from "react";
 import { getResults, submitResult } from "../api/results";
+import { submitSwimmer, type CreateSwimmerBody } from "../api/swimmers";
+import { submitTeam, setTeamMembers, setTeamTrainer, deleteTeam, type CreateTeamBody } from "../api/teams";
 
 class Results {
   results = observable.array<Result>();
@@ -32,9 +34,34 @@ class Results {
       swimmersMap: computed,
       lader: computed,
       addResult: action,
+      addSwimmer: action,
+      addTeam: action,
+      setTeamMembers: action,
+      setTeamTrainer: action,
+      deleteTeam: action,
       distances: computed,
       summaryTableRows: computed,
+      teamsSelect: computed,
+      trainersSelect: computed,
+      swimmersSelect: computed,
     });
+  }
+
+  get teamsSelect() {
+    return this.teams.map((team) => ({
+      label: team.label,
+      value: team.id
+    }));
+  }
+
+  get trainersSelect() {
+    return this.swimmers
+      .filter((s) => s.role === 'trainer')
+      .map((s) => ({ label: s.name, value: s.id }));
+  }
+
+  get swimmersSelect() {
+    return this.swimmers.map((s) => ({ label: s.name, value: s.id }));
   }
 
   get swimmersMap() {
@@ -64,6 +91,56 @@ class Results {
         this.results.push(new Result(result, this));
       }
     }));
+  }
+
+  async addSwimmer(data: CreateSwimmerBody) {
+    const swimmer = await submitSwimmer(data);
+    runInAction(() => {
+      this.swimmers.push(new Swimmer(swimmer, this));
+    });
+    return swimmer;
+  }
+
+  async addTeam(data: CreateTeamBody) {
+    const team = await submitTeam(data);
+    runInAction(() => {
+      this.teams.push(new Team(team, this));
+    });
+    return team;
+  }
+
+  async setTeamMembers(teamId: number, swimmerIds: number[]) {
+    const { swimmerIds: saved } = await setTeamMembers(teamId, swimmerIds);
+    const selected = new Set(saved);
+    runInAction(() => {
+      for (const swimmer of this.swimmers) {
+        const without = swimmer.teamIds.filter((id) => id !== teamId);
+        swimmer.setTeamIds(
+          selected.has(swimmer.id) ? [...without, teamId] : without,
+        );
+      }
+    });
+  }
+
+  async setTeamTrainer(teamId: number, trainerId: number | null) {
+    const { trainerId: saved } = await setTeamTrainer(teamId, trainerId);
+    runInAction(() => {
+      const team = this.teams.find((t) => t.id === teamId);
+      team?.setTrainerId(saved);
+    });
+  }
+
+  async deleteTeam(teamId: number) {
+    await deleteTeam(teamId);
+    runInAction(() => {
+      const index = this.teams.findIndex((t) => t.id === teamId);
+      if (index >= 0) this.teams.splice(index, 1);
+      for (const swimmer of this.swimmers) {
+        if (swimmer.teamIds.includes(teamId)) {
+          swimmer.setTeamIds(swimmer.teamIds.filter((id) => id !== teamId));
+        }
+      }
+    });
   }
 }
 

@@ -9,6 +9,10 @@ class Result {
     this.#model = new WeakRef(model);
   }
 
+  get id() {
+    return this.data.id;
+  }
+
   get result() {
     return this.data.result;
   }
@@ -19,6 +23,10 @@ class Result {
 
   get swimmerId() {
     return this.data.swimmerId;
+  }
+
+  get water() {
+    return this.data.water;
   }
 
   get fifty() {

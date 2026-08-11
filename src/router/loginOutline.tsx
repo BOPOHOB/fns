@@ -16,7 +16,13 @@ const LoginOutline = observer(() => {
         <nav>
           <Link to="/"><img src={logo} alt="logo" /></Link>
           {
-            session.isTrainer && (<Link to="/series">Серия</Link>)
+            session.isTrainer && (
+              <>
+                <Link to="/swimmers/add">Добавить пловца</Link>
+                <Link to="/teams">Группы</Link>
+                <Link to="/series">Серия</Link>
+              </>
+            )
           }
         </nav>
 

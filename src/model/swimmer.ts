@@ -1,6 +1,6 @@
 import type { Results } from "./results";
 import type { Sex, Swimmer as SwimmerJSON } from "../types/swimmer";
-import { computed, makeObservable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 
@@ -8,11 +8,15 @@ dayjs.extend(customParseFormat);
 
 class Swimmer {
   readonly #model: WeakRef<Results>;
+  teamId: number[];
 
   constructor(private readonly data: SwimmerJSON, model: Results) {
     this.#model = new WeakRef(model);
+    this.teamId = [...data.teamId];
 
     makeObservable(this, {
+      teamId: observable,
+      setTeamIds: action,
       bestSex: computed,
       bestGroup: computed,
       sexEmoji: computed,
@@ -21,6 +25,10 @@ class Swimmer {
       row: computed,
       results: computed
     });
+  }
+
+  setTeamIds(ids: number[]) {
+    this.teamId = [...ids];
   }
 
   get key() {
@@ -33,6 +41,10 @@ class Swimmer {
 
   get name() {
     return this.data.name;
+  }
+
+  get birthDate() {
+    return this.data.birthDate;
   }
 
   get age(): number | undefined {
@@ -49,11 +61,22 @@ class Swimmer {
     return this.#model.deref().lader.find(swimmer => swimmer.sex === this.sex) === this;
   }
   get bestGroup(): boolean {
-    return this.#model.deref().lader.find(swimmer => swimmer.sex === this.sex && swimmer.data.teamId === this.data.teamId) === this;
+    return this.#model.deref().lader.find(swimmer =>
+      swimmer.sex === this.sex &&
+      swimmer.teamIds.some((id) => this.teamIds.includes(id))
+    ) === this;
   }
 
   get sex() {
     return this.data.sex;
+  }
+
+  get role() {
+    return this.data.role;
+  }
+
+  get teamIds() {
+    return this.teamId;
   }
   
   get sexEmoji() {

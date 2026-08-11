@@ -1,11 +1,10 @@
 import { action, computed, makeObservable, observable, runInAction, transaction } from "mobx";
 import { Result } from './result';
-import type { Result as ResultRawData } from '../types/result';
 import { Swimmer } from './swimmer';
 import { ResultSeries } from './resultSeries';
 import { Team } from './team';
 import { createContext, useContext } from "react";
-import { getResults } from "../api/results";
+import { getResults, submitResult } from "../api/results";
 
 class Results {
   results = observable.array<Result>();
@@ -55,8 +54,16 @@ class Results {
     return this.swimmers.map(({ row }) => row);
   }
 
-  addResult(data: ResultRawData) {
-    this.results.push(new Result(data, this));
+  async addResult(data: Parameters<typeof submitResult>[0]) {
+    const {results, series} = await submitResult(data);
+    runInAction(() => transaction(() => {
+      if (series !== null) {
+        this.series.push(new ResultSeries(series, this));
+      }
+      for (const result of results) {
+        this.results.push(new Result(result, this));
+      }
+    }));
   }
 }
 

@@ -24,6 +24,7 @@
         "npm:@vitejs/plugin-react@^6.0.3",
         "npm:antd@^6.5.1",
         "npm:babel-plugin-react-compiler@1",
+        "npm:clsx@^2.1.1",
         "npm:d3@^7.9.0",
         "npm:dayjs@^1.11.21",
         "npm:less@^4.8.0",

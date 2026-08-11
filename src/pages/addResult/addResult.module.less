@@ -5,6 +5,47 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+
+  .triplet {
+    display: flex;
+    gap: 8px;
+  }
+  .tripletTitle {
+    display: flex;
+    gap: 8px;
+    margin-bottom: -12px;
+    >p {
+      width: 33.333%;
+      margin-left: 8px;
+      font-size: 70%;
+    }
+  }
+  .row, .results {
+    gap: 8px;
+    display: flex;
+    justify-content: start;
+    align-items: baseline;
+  }
+  .results {
+    gap: 0px;
+  }
+
+  .scroll {
+    overflow-x: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .waterSelector {
+      position: sticky;
+      left: 0px;
+    }
+
+    .input {
+      min-width: 60px;
+      --ant-color-text-disabled: black;
+    }
+  }
 }
 
 .field {

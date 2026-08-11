@@ -1,7 +1,6 @@
-import { useState } from 'react';
-import { Button, DatePicker, Radio, Typography, Space, Alert } from 'antd';
+import { useEffect, useState } from 'react';
+import { Button, DatePicker, Radio, Typography, Space, Alert, InputNumber, Tooltip } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
-import { observer } from 'mobx-react';
 import { Link, useNavigate } from 'react-router';
 import type { ResultCondition, WaterType } from '../../types/result';
 
@@ -10,11 +9,16 @@ import { useSwimmer } from '../../router/swimmerOutline';
 import { AsyncButton } from '../../components/asyncButton';
 import { submitResult } from '../../api/results';
 import TextArea from 'antd/es/input/TextArea';
-import { Stages, type StagesRawInput } from './stages';
-import { ResultInput } from './resultInput';
+import { STAGE_INTERVALS, type Stage, type StagesRawInput } from './stages';
+import { TimeInput } from './timeInput';
 import { DistanceSelect } from './distanceSelect';
 import { useStorageState } from '../../utils/useStorageState';
 import { useResults } from '../../model/results';
+import { useSeriesController } from './useSeriesController';
+import { plural } from '../../utils/plural';
+import { StagesOpen } from './stagesOpen';
+import { StagesMatrix } from './stagesMatrix';
+import { CloseCircleOutlined, WarningOutlined } from '@ant-design/icons';
 
 export const RESULT_CONDITION_OPTIONS: { value: ResultCondition; label: string }[] = [
   { value: 'competition', label: 'Соревнования' },
@@ -28,42 +32,108 @@ export const RESULT_WATER_OPTIONS: { value: WaterType; label: string }[] = [
   { value: 'open', label: 'Открытая вода' },
 ];
 
+const OPEN_MIN_DISTANCE = 500;
+
+const isHaveMultiplicity = (val: number, div: number) => Math.floor(val / div) === val / div && val / div > 1;
+
+function resize<T>(arr: Array<T>, size: number, initialValue: (id: number) => T) {
+  if (arr.length === size) {
+    return arr;
+  }
+  return arr.slice(0, size).concat(new Array(Math.max(0, size - arr.length)).fill(null).map((_, id) => initialValue(id)));
+}
+
 const AddResult = () => {
   const navigate = useNavigate();
   const swimmer = useSwimmer();
   const results = useResults();
 
   const [distance, setDistance] = useStorageState<number>(50, 'addResult.distance');
-  const [time, setTime] = useState<number | null>(null);
   const [date, setDate] = useStorageState<Dayjs>(() => dayjs(), 'addResult.date');
   const [water, setWater] = useStorageState<WaterType>('quarter', 'addResult.water');
+  const [repeat, setRepeat] = useStorageState<number>(1, 'addResult.repeat');
+  const [result, setResult] = useState<Array<number | null>>(new Array(repeat).fill(null));
+  const {
+    speed, setSpeed,
+    pause, setPause,
+    interval, setInterval
+  } = useSeriesController();
   const [condition, setCondition] = useStorageState<ResultCondition>('workout', 'addResult.condition');
   const [notes, setNotes] = useState('');
-  const [stages, setStages] = useState<StagesRawInput>([]);
+  const [stages, setStages] = useState<StagesRawInput[]>([[]]);
+  const [stageInterval, setStageInterval] = useStorageState<Stage | null>(100, 'addResult.stage');
 
-  const stagesResult = stages.reduce((prv, { result }) => prv + result, 0);
-  const stagesDistance = stages.reduce((prv, { distance }) => prv + distance, 0);
+  const setResultItem = (id: number) => (value: number | null) => {
+    const newResult = [...result];
+    newResult[id] = value;
+    setResult(newResult);
+  };
 
-  const valid = time !== null
-    && stages.find(v => v.result === null) === undefined
-    && (stagesDistance === distance || stagesDistance === 0)
-    && (stagesResult === time || stagesResult === 0);
+  const setRepeatStages = (repeatId: number) => (value: StagesRawInput) => {
+    const newSages = [...stages];
+    newSages[repeatId] = value;
+    setStages(newSages);
+  };
+
+  // Выключаем серии на открытой воде
+  useEffect(() => {
+    if (water === 'open' && repeat !== 1) {
+      setRepeat(1);
+    }
+  }, [water]);
+
+  // Настраиваем размер результатов под число повторений
+  useEffect(() => {
+    setResult(resize(result, repeat, () => null));
+  }, [repeat]);
+
+  // Выравниваем размер стейджей согласно шагу, повторам и дистанции
+  useEffect(() => {
+    if (water === 'open') {
+      setStages([[]]);
+      return;
+    }
+    const steps = distance / stageInterval;
+    const stageConstructor = () => ({
+      result: null,
+      distance: stageInterval
+    });
+    setStages(stageInterval === null ? [] : new Array(repeat).fill(null).map(() => new Array(steps).fill(null).map(stageConstructor)));
+  }, [[repeat, stageInterval, distance, water]])
+
+  // Подравнять шаг
+  useEffect(() => {
+    if (!isHaveMultiplicity(distance, stageInterval)) {
+      setStageInterval(({
+        25: null,
+        50: null,
+        100: 50,
+      } as const)[distance] ?? 100);
+    }
+  }, [distance]);
+
+  // Выключаем открытую воду на коротких дистанциях
+  useEffect(() => {
+    if (distance < OPEN_MIN_DISTANCE) {
+      setWater('fifty');
+    }
+  }, [distance]);
 
   const [error, setError] = useState();
 
   const handleSave = async () => {
     try {
-      const result = await submitResult({
+      const response = await submitResult({
         swimmerId: swimmer.id,
         distance,
-        result: time!,
+        result,
         water,
         type: condition,
         date: date.toISOString(),
         notes,
         stages,
       });
-      results.addResult(result);
+      results.addResult(response);
       navigate('/');
     } catch (error) {
       setError(error);
@@ -85,6 +155,50 @@ const AddResult = () => {
     );
   }
 
+  const stagesSelector = (
+    <Radio.Group
+      className={cn.waterSelector}
+      optionType="button"
+      value={stageInterval ?? 0}
+      onChange={(e) => {setStageInterval(e.target.value === 0 ? null : e.target.value);}}
+      options={STAGE_INTERVALS.map(v => ({ ...v, disabled: !isHaveMultiplicity(distance, v.value) }))}
+    />
+  );
+
+  const errorMessage = (() => {
+    for (const [id, val] of result.entries()) {
+      if (val === null) {
+        return `Результат ${id + 1} не заполнен`;
+      }
+    }
+    for (const stage of stages) {
+      let isEmpty = true;
+      let isFilled = true;
+      for (const { result } of stage) {
+        if (result !== null) {
+          isEmpty = false;
+        }
+        if (result === null) {
+          isFilled = false;
+        }
+      }
+      if (!isEmpty && !isFilled) {
+        if (repeat !== 1) {
+          return `Этап ${stages.indexOf(stage) + 1} заполнен частично. Разбивку нужно либо заполнить полностью либо оставить пустой целиком`;
+        } else {
+          return 'Разбивка заполнена частично. Надо либо заполнить полностью либо оставить пустой';
+        }
+      }
+      if (stage.at(-1).result < 0) {
+        return `Время в разбивке ${stages.indexOf(stage) + 1} не совпадает с результатом`;
+      }
+    }
+    return null;
+  })();
+  const warnMessage = (() => {
+    return null;
+  })();
+
   return (
     <div className={cn.page}>
       <Typography.Title level={3}>
@@ -95,11 +209,6 @@ const AddResult = () => {
         className={cn.field}
         value={distance}
         onChange={setDistance}
-      />
-      <ResultInput
-        className={cn.field}
-        value={time}
-        onChange={setTime}
       />
       <DatePicker
         className={cn.field}
@@ -112,7 +221,10 @@ const AddResult = () => {
         optionType="button"
         value={water}
         onChange={(e) => setWater(e.target.value)}
-        options={RESULT_WATER_OPTIONS}
+        options={RESULT_WATER_OPTIONS.map((v) => ({
+          ...v,
+          disabled: v.value === 'open' && distance < OPEN_MIN_DISTANCE
+        }))}
       />
       <Radio.Group
         className={cn.field}
@@ -121,14 +233,68 @@ const AddResult = () => {
         onChange={(e) => setCondition(e.target.value)}
         options={RESULT_CONDITION_OPTIONS}
       />
-      <Stages target={time} value={stages} onChange={setStages} water={water} distance={distance} />
-      <TextArea rows={4} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Заметки" />
+      {water !== 'open' && (
+        <div className={cn.row}>
+          <InputNumber min={1} max={300} value={repeat} onChange={(v) => setRepeat(v)} />
+          <p>{plural(repeat, ['повторение', 'повторений', 'повторения'])}</p>
+        </div>
+      )}
+      {repeat > 1 && (
+        <>
+          <div className={cn.tripletTitle}>
+            <p>Режим</p>
+            <p>Темп</p>
+            <p>Пауза</p>
+          </div>
+          <div className={cn.triplet}>
+            <TimeInput
+              className={cn.field}
+              value={interval}
+              onChange={setInterval}
+              placeholder="Интервал"
+              disabled={repeat === 1}
+            />
+            <TimeInput
+              className={cn.field}
+              value={speed}
+              onChange={setSpeed}
+              placeholder="Темп"
+              disabled={repeat === 1}
+            />
+            <TimeInput
+              className={cn.field}
+              value={pause}
+              onChange={setPause}
+              placeholder="Пауза"
+              disabled={repeat === 1}
+            />
+          </div>
+        </>
+      )}
+      <div className={cn.scroll}>
+        <div className={cn.results}>
+          {
+            result.map((v, id) => (
+              <TimeInput className={cn.input} tabIndex={id + 1} key={id} value={v} onChange={setResultItem(id)} placeholder={repeat === 1 ? 'Результат' : `${id + 1} повторение`} />
+            ))
+          }
+        </div>
+        {water !== 'open' && stageInterval !== null && stagesSelector}
+        {
+          water === 'open' ? <StagesOpen target={result[0]} value={stages[0]} onChange={setRepeatStages(0)} distance={distance} />
+          : (stageInterval !== null && <StagesMatrix results={result} inputClassName={cn.input} step={stageInterval} value={stages} onChange={setStages} />)
+        }
+      </div>
+      {water !== 'open' && stageInterval === null && stagesSelector}
+      <TextArea tabIndex={repeat + 1} rows={4} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Заметки" />
 
       <Space>
         <Button onClick={() => navigate('/')}>Отмена</Button>
-        <AsyncButton type="primary" disabled={!valid} onClick={handleSave}>
-          Сохранить
-        </AsyncButton>
+        <Tooltip title={errorMessage ?? warnMessage}>
+          <AsyncButton icon={errorMessage ? <CloseCircleOutlined /> : (warnMessage ? <WarningOutlined /> : undefined)} color={warnMessage ? 'danger' : 'default'} type="primary" disabled={Boolean(errorMessage)} onClick={handleSave}>
+            Сохранить
+          </AsyncButton>
+        </Tooltip>
       </Space>
     </div>
   );

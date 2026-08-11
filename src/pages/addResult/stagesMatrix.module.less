@@ -1,0 +1,19 @@
+.matrix {
+  display: grid;
+
+  > div {
+    position: relative;
+    align-self: stretch;
+
+    > input {
+      height: 100%;
+    }
+
+    .join {
+      position: absolute;
+      top: -12px;
+      right: 12px;
+      transform: rotate(90deg) scale(0.8);
+    }
+  }
+}

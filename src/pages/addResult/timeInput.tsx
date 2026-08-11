@@ -1,5 +1,5 @@
-import { Input } from "antd";
-import { useState, type FC } from "react";
+import { Input, type InputProps } from "antd";
+import { useEffect, useRef, useState, type FC } from "react";
 import { stringifySeconds } from "../../utils/stringifySeconds";
 
 function parseTimeInput(input: string): number | null {
@@ -32,19 +32,28 @@ function isValidTimeInput(input: string): boolean {
   return val !== null && val > 0;
 }
 
-const ResultInput: FC<{ className?: string, value: number | null, onChange: ((v: number | null) => void) }> = ({ className, value, onChange }) => {
+const TimeInput: FC<Omit<InputProps, 'value' | 'onChange' | 'status'> & { value: number | null, onChange: ((v: number | null) => void) }> = 
+({ value, onChange, ...spread }) => {
   const [input, setInput] = useState(stringifySeconds(value));
-  const status = isValidTimeInput(input) || input === '' ? undefined : 'warning';
+  const status: InputProps['status'] = isValidTimeInput(input) || input === '' ? (value < 0 ? 'error' : undefined) : 'warning';
+
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (document.activeElement !== ref.current.nativeElement) {
+      setInput(stringifySeconds(value));
+    }
+  }, [value]);
 
   return (
     <Input
-      className={className}
+      ref={ref}
       status={status}
       onChange={(e) => { setInput(e.target.value); onChange(parseTimeInput(e.target.value)); }}
-      placeholder="hh:mm:ss.ss"
       value={input}
+      {...spread}
     />
   );
 }
 
-export { ResultInput }
+export { TimeInput }

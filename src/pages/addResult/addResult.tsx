@@ -7,7 +7,6 @@ import type { ResultCondition, WaterType } from '../../types/result';
 import cn from './addResult.module.less';
 import { useSwimmer } from '../../router/swimmerOutline';
 import { AsyncButton } from '../../components/asyncButton';
-import { submitResult } from '../../api/results';
 import TextArea from 'antd/es/input/TextArea';
 import { STAGE_INTERVALS, type Stage, type StagesRawInput } from './stages';
 import { TimeInput } from './timeInput';
@@ -19,6 +18,7 @@ import { plural } from '../../utils/plural';
 import { StagesOpen } from './stagesOpen';
 import { StagesMatrix } from './stagesMatrix';
 import { CloseCircleOutlined, WarningOutlined } from '@ant-design/icons';
+import { normalizeSpeed, isSpeedDistributed, stagesSpeed } from './speedChecker';
 
 export const RESULT_CONDITION_OPTIONS: { value: ResultCondition; label: string }[] = [
   { value: 'competition', label: 'Соревнования' },
@@ -70,9 +70,9 @@ const AddResult = () => {
   };
 
   const setRepeatStages = (repeatId: number) => (value: StagesRawInput) => {
-    const newSages = [...stages];
-    newSages[repeatId] = value;
-    setStages(newSages);
+    const newStages = [...stages];
+    newStages[repeatId] = value;
+    setStages(newStages);
   };
 
   // Выключаем серии на открытой воде
@@ -84,7 +84,7 @@ const AddResult = () => {
 
   // Настраиваем размер результатов под число повторений
   useEffect(() => {
-    setResult(resize(result, repeat, () => null));
+    setResult((result) => resize(result, repeat, () => null));
   }, [repeat]);
 
   // Выравниваем размер стейджей согласно шагу, повторам и дистанции
@@ -98,8 +98,8 @@ const AddResult = () => {
       result: null,
       distance: stageInterval
     });
-    setStages(stageInterval === null ? [] : new Array(repeat).fill(null).map(() => new Array(steps).fill(null).map(stageConstructor)));
-  }, [[repeat, stageInterval, distance, water]])
+    setStages(stageInterval === null ? [[]] : new Array(repeat).fill(null).map(() => new Array(steps).fill(null).map(stageConstructor)));
+  }, [repeat, stageInterval, distance, water])
 
   // Подравнять шаг
   useEffect(() => {
@@ -123,7 +123,7 @@ const AddResult = () => {
 
   const handleSave = async () => {
     try {
-      const response = await submitResult({
+      await results.addResult({
         swimmerId: swimmer.id,
         distance,
         result,
@@ -132,8 +132,9 @@ const AddResult = () => {
         date: date.toISOString(),
         notes,
         stages,
+        speed,
+        interval
       });
-      results.addResult(response);
       navigate('/');
     } catch (error) {
       setError(error);
@@ -168,6 +169,9 @@ const AddResult = () => {
   const errorMessage = (() => {
     for (const [id, val] of result.entries()) {
       if (val === null) {
+        if (repeat === 1) {
+          return "Результат не заполнен";
+        }
         return `Результат ${id + 1} не заполнен`;
       }
     }
@@ -196,6 +200,22 @@ const AddResult = () => {
     return null;
   })();
   const warnMessage = (() => {
+    if (repeat !== 1) {
+      if (speed === null) {
+        return "Не задан темп серии";
+      }
+      if (interval === null) {
+        return "Не задан интервал серии";
+      }
+    }
+    if (isSpeedDistributed(normalizeSpeed(result, distance))) {
+      return "Скорости, указанные в результатах существенно отличаются";
+    }
+    for (const [id, stage] of stages.entries()) {
+      if (isSpeedDistributed(stagesSpeed(stage))) {
+        return `Скорости на этапе ${id + 1} сильно отличаются между собой`;
+      }
+    }
     return null;
   })();
 
@@ -235,7 +255,7 @@ const AddResult = () => {
       />
       {water !== 'open' && (
         <div className={cn.row}>
-          <InputNumber min={1} max={300} value={repeat} onChange={(v) => setRepeat(v)} />
+          <InputNumber min={1} max={300} value={repeat || null} onChange={(v) => setRepeat(v ?? 0)} />
           <p>{plural(repeat, ['повторение', 'повторений', 'повторения'])}</p>
         </div>
       )}
@@ -291,7 +311,13 @@ const AddResult = () => {
       <Space>
         <Button onClick={() => navigate('/')}>Отмена</Button>
         <Tooltip title={errorMessage ?? warnMessage}>
-          <AsyncButton icon={errorMessage ? <CloseCircleOutlined /> : (warnMessage ? <WarningOutlined /> : undefined)} color={warnMessage ? 'danger' : 'default'} type="primary" disabled={Boolean(errorMessage)} onClick={handleSave}>
+          <AsyncButton
+            icon={errorMessage ? <CloseCircleOutlined /> : (warnMessage ? <WarningOutlined /> : undefined)}
+            color={warnMessage ? 'danger' : 'default'}
+            type="primary"
+            disabled={Boolean(errorMessage)}
+            onClick={handleSave}
+          >
             Сохранить
           </AsyncButton>
         </Tooltip>

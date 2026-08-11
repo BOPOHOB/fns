@@ -3,10 +3,10 @@ type ResultSeries = {
   id: number;
   // YYYY-MM-DD HH:MM:SS (канонический формат SQLite datetime)
   date: string;
-  // Сколько времени на каждое повторение
-  regime: number;
-  // За сколько надо проплыть повторение
-  speed: number;
+  // Сколько времени на каждое повторение (интервал); null если не задан
+  regime: number | null;
+  // За сколько надо проплыть повторение; null если не задан
+  speed: number | null;
   // Сколько повторений
   repetitions: number;
 };

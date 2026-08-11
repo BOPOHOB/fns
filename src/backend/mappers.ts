@@ -36,8 +36,8 @@ export type ResultRow = {
 export type SeriesRow = {
   id: number;
   date: string;
-  regime: number;
-  speed: number;
+  regime: number | null;
+  speed: number | null;
   repetitions: number;
 };
 

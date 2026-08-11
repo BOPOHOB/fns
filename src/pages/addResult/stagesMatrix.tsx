@@ -14,8 +14,8 @@ const StagesMatrix: FC<{
   results: Array<number | null>;
 }> = ({ onChange, value, step, inputClassName, results }) => {
   const matrix: Array<ReactElement> = [];
-  const onStageChange = (row: number, col: StagesRawInput) => (val: null | number) => {
-    col[row].result = val;
+  const onStageChange = (index: number, col: StagesRawInput) => (val: null | number) => {
+    col[index].result = val;
     onChange(structuredClone(value));
   }
 
@@ -76,7 +76,7 @@ const StagesMatrix: FC<{
         
         matrix.push(
           <div key={`${row}_${col}`} style={style}>
-            <TimeInput disabled={index + 1 === repeat.length} className={inputClassName} tabIndex={col + 1} placeholder={span === 1 ? `${row + 1} этап` : `${row + 1} - ${row + span} этапы`} onChange={onStageChange(row, repeat)} value={repeat[index].result} />
+            <TimeInput disabled={index + 1 === repeat.length} className={inputClassName} tabIndex={col + 1} placeholder={span === 1 ? `${row + 1} этап` : `${row + 1} - ${row + span} этапы`} onChange={onStageChange(index, repeat)} value={repeat[index].result} />
             { Boolean(row) && <Button
               size="small"
               className={cn.join}

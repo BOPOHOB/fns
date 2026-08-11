@@ -38,7 +38,7 @@ type Result = {
   date: string;
   type: ResultCondition;
   water: WaterType;
-  stages: Stages;
+  stages: Stages | null;
   notes: string;
 };
 

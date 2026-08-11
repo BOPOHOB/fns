@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react';
 import { Button, Popconfirm, Spin, Table, Tooltip } from 'antd';
-import { Link, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { useResults } from '../../model/results';
 import type { ColumnsType } from 'antd/es/table';

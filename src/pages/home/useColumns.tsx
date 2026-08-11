@@ -6,6 +6,9 @@ import { Link, useNavigate } from "react-router";
 import type { Swimmer } from "../../model/swimmer";
 import { useSession } from "../../model/session";
 import { PlusOutlined } from "@ant-design/icons";
+import { useFilters } from "./useFilters";
+import { distancesForCategories } from "../../shared/distances";
+import { distanceName } from "../addResult/distanceSelect";
 
 import cn from './columns.module.less';
 import type { Result } from "../../model/result";
@@ -53,6 +56,9 @@ const useColumns = (): ColumnsType<Swimmer["row"]> => {
   const results = useResults();
   const session = useSession();
   const navigate = useNavigate();
+  const { filters } = useFilters();
+  const visibleDistances = distancesForCategories(filters.distances, results.distances);
+
   return useMemo(() => [
     {
       title: 'Пловец',
@@ -85,17 +91,17 @@ const useColumns = (): ColumnsType<Swimmer["row"]> => {
       dataIndex: 'age',
       key: 'age',
     },
-    ...results.distances.map(distance => ({
-      title: distance,
+    ...visibleDistances.map(distance => ({
+      title: distanceName(distance, true),
       dataIndex: distance,
       key: distance,
-      render: (results) => {
-        return results?.map((e, i) => (
-          <div key={i}>{renderResult(e, i === 0 ? e.markers : [])}</div>
+      render: (cellResults: Result[] | undefined) => {
+        return cellResults?.map((e, i) => (
+          <div key={e.id}>{renderResult(e, [])}</div>
         )) ?? '—';
       }
     }))
-  ], [results.isLoading, session.isTrainer]);
+  ], [visibleDistances.join(','), results.isLoading, session.isTrainer, navigate]);
 };
 
 export { useColumns };

@@ -44,6 +44,10 @@ class Result {
     return this.data.type
   }
 
+  get stages() {
+    return this.data.stages ?? [];
+  }
+
   get swimmer() {
     return this.#model.deref().swimmersMap.get(this.data.swimmerId);
   }

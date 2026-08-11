@@ -6,7 +6,7 @@ import { useSwimmer } from '../../router/swimmerOutline';
 import { useResults } from '../../model/results';
 import { stringifySeconds } from '../../utils/stringifySeconds';
 import { distanceName } from '../addResult/distanceSelect';
-import type { ResultCondition, WaterType } from '../../types/result';
+import type { ResultCondition, Stages, WaterType } from '../../types/result';
 
 import cn from './swimmer.module.less';
 
@@ -18,6 +18,7 @@ type ResultRow = {
   date?: string;
   water: WaterType;
   condition: ResultCondition | 'open';
+  stages: Stages;
 };
 
 const CONDITION_LABEL: Record<ResultCondition | 'open', string> = {
@@ -43,6 +44,21 @@ function formatSpeed(distance: number, seconds: number): string {
   return ((seconds / distance) * 100).toFixed(1);
 }
 
+function renderStages(stages: Stages) {
+  if (!stages.length) return '—';
+  return (
+    <ul className={cn.stages}>
+      {stages.map((stage, i) => (
+        <li key={`${stage.distance}-${i}`}>
+          <span>{distanceName(stage.distance, true)}</span>
+          <span>{stringifySeconds(stage.result)}</span>
+          <span>{formatSpeed(stage.distance, stage.result)}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 const Swimmer = observer(() => {
   const swimmer = useSwimmer();
   const results = useResults();
@@ -64,6 +80,7 @@ const Swimmer = observer(() => {
         : undefined,
       water: r.water,
       condition: r.condition,
+      stages: r.stages,
     }));
 
   const columns: ColumnsType<ResultRow> = [
@@ -74,7 +91,12 @@ const Swimmer = observer(() => {
       render: (v: number) => distanceName(v, true),
     },
     { title: 'Время', dataIndex: 'time', width: 100 },
-    { title: 'Темп', dataIndex: 'speed', width: 120 },
+    { title: 'Темп', dataIndex: 'speed', width: 80 },
+    {
+      title: 'Разбивка',
+      dataIndex: 'stages',
+      render: renderStages,
+    },
     {
       title: 'Дата',
       dataIndex: 'date',

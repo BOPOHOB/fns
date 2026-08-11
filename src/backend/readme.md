@@ -18,7 +18,7 @@ export OAUTH_REDIRECT_URI=http://localhost:5173/auth/callback
 deno task backend
 ```
 
-По умолчанию `OAUTH_REDIRECT_URI` = `{FRONTEND_ORIGIN}/auth/callback`, `DB_PATH` = `../fns/data.db`.
+По умолчанию `OAUTH_REDIRECT_URI` = `{FRONTEND_ORIGIN}/auth/callback`, `DB_PATH` = `data.db` в корне проекта.
 
 Типы API — из `src/types`, общие хелперы — из `src/shared`. При open БД: `PRAGMA foreign_keys = ON`.
 

@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
+    "deploy": "bash deploy.sh",
     "agent": "agent --resume=6ace765c-5efd-409e-954f-c211ddcb2177"
   },
   "dependencies": {

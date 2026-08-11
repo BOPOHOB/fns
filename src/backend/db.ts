@@ -8,12 +8,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const PROJECT_ROOT = path.resolve(__dirname, '../..');
 
 /**
- * Путь к SQLite. По умолчанию — data.db рядом с репозиторием fns
- * (пока БД живёт там). Переопределение: DB_PATH.
+ * Путь к SQLite. По умолчанию — `data.db` в корне проекта.
+ * Переопределение: DB_PATH.
  */
 export function resolveDbPath(): string {
   if (Deno.env.get('DB_PATH')) return path.resolve(Deno.env.get('DB_PATH')!);
-  return path.resolve(PROJECT_ROOT, '../fns/data.db');
+  return path.resolve(PROJECT_ROOT, 'data.db');
 }
 
 export function openDb(dbPath = resolveDbPath()): DatabaseSync {

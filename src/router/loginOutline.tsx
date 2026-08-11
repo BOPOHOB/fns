@@ -20,7 +20,6 @@ const LoginOutline = observer(() => {
               <>
                 <Link to="/swimmers/add">Добавить пловца</Link>
                 <Link to="/teams">Группы</Link>
-                <Link to="/series">Серия</Link>
               </>
             )
           }

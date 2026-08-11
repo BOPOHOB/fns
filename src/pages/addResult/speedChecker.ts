@@ -5,7 +5,6 @@ const getStandardDeviation = (arr: Array<number>) => Math.sqrt(arr.reduce((sum, 
 const isSpeedDistributed = (speed: number[]) => {
   const mid = getStandardDeviation(speed);
   for (const val of speed) {
-    console.log(mid, val, speed, Math.abs(val - mid), mid / 2);
     if (Math.abs(val - mid) > mid / 2) {
       return true;
     }
@@ -13,8 +12,10 @@ const isSpeedDistributed = (speed: number[]) => {
   return false;
 };
 
+const speedOutOfRange = (speed: number[]) => speed.findIndex(v => v < 40 || v > 360);
+
 const normalizeSpeed = (results: Array<number>, distance: number) => results.map(v => v / distance * 100);
 
 const stagesSpeed = (stages: StagesRawInput) => stages.map(({ result, distance }) => result / distance * 100);
 
-export { isSpeedDistributed, normalizeSpeed, stagesSpeed };
+export { isSpeedDistributed, normalizeSpeed, stagesSpeed, speedOutOfRange };

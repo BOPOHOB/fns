@@ -14,10 +14,12 @@ const StagesMatrix: FC<{
   results: Array<number | null>;
 }> = ({ onChange, value, step, inputClassName, results }) => {
   const matrix: Array<ReactElement> = [];
-  const onStageChange = (index: number, col: StagesRawInput) => (val: null | number) => {
-    col[index].result = val;
-    onChange(structuredClone(value));
-  }
+
+  const onStageChange = (colIdx: number, index: number) => (val: null | number) => {
+    const next = structuredClone(value);
+    next[colIdx][index].result = val;
+    onChange(next);
+  };
 
   const rows = (value.at(0)?.reduce((prw, cur) => cur.distance + prw, 0) ?? 0) / step;
 
@@ -31,38 +33,41 @@ const StagesMatrix: FC<{
     return iter === row && index < repeat.length ? index : null;
   };
 
-  const join = (repeat: StagesRawInput, index: number) => () => {
+  const join = (colIdx: number, index: number) => () => {
+    const next = structuredClone(value);
+    const repeat = next[colIdx];
     console.assert(index < repeat.length - 1, `index ${index} must be less then ${repeat.length - 1}`);
     const [s] = repeat.splice(index, 1);
     const acceptor = repeat[index];
     acceptor.distance += s.distance;
     acceptor.result = acceptor.result === null && s.result === null ? null : ((s.result ?? 0) + (acceptor.result ?? 0));
-    onChange(structuredClone(value));
+    onChange(next);
   };
 
   useEffect(() => {
+    const next = structuredClone(value);
     let isChanged = false;
-    for (let i = 0; i < value.length; ++i) {
+    for (let i = 0; i < next.length; ++i) {
       let isReady = results[i] !== null;
-      for (let j = 0; j < value[i].length - 1; ++j) {
-        if (value[i][j].result === null) {
+      for (let j = 0; j < next[i].length - 1; ++j) {
+        if (next[i][j].result === null) {
           isReady = false;
         }
       }
       if (isReady) {
-        const computed = results[i] - value[i].slice(0, -1).reduce((prw, cur) => prw + cur.result, 0);;
-        if (value[i].at(-1).result !== computed) {
+        const computed = results[i] - next[i].slice(0, -1).reduce((prw, cur) => prw + cur.result, 0);
+        if (next[i].at(-1).result !== computed) {
           isChanged = true;
-          value[i].at(-1).result = computed;
-        } 
-      } else if (value[i].length > 0 && value[i].at(-1).result !== null) {
+          next[i].at(-1).result = computed;
+        }
+      } else if (next[i].length > 0 && next[i].at(-1).result !== null) {
         isChanged = true;
-        value[i].at(-1).result = null;
+        next[i].at(-1).result = null;
       }
     }
 
     if (isChanged) {
-      onChange(structuredClone(value));
+      onChange(next);
     }
   }, [results, value]);
 
@@ -73,17 +78,26 @@ const StagesMatrix: FC<{
 
         const span = repeat[index].distance / step;
         const style = span === 1 ? undefined : { gridRowEnd: `span ${span}`, height: 27 * span };
-        
+
         matrix.push(
           <div key={`${row}_${col}`} style={style}>
-            <TimeInput disabled={index + 1 === repeat.length} className={inputClassName} tabIndex={col + 1} placeholder={span === 1 ? `${row + 1} этап` : `${row + 1} - ${row + span} этапы`} onChange={onStageChange(index, repeat)} value={repeat[index].result} />
-            { Boolean(row) && <Button
-              size="small"
-              className={cn.join}
-              icon={<MergeCellsOutlined />}
-              onClick={join(repeat, index - 1)}
-              variant="text"
-            /> }
+            <TimeInput
+              disabled={index + 1 === repeat.length}
+              className={inputClassName}
+              tabIndex={col + 1}
+              placeholder={span === 1 ? `${row + 1} этап` : `${row + 1} - ${row + span} этапы`}
+              onChange={onStageChange(col, index)}
+              value={repeat[index].result}
+            />
+            {Boolean(row) && (
+              <Button
+                size="small"
+                className={cn.join}
+                icon={<MergeCellsOutlined />}
+                onClick={join(col, index - 1)}
+                variant="text"
+              />
+            )}
           </div>
         );
       }

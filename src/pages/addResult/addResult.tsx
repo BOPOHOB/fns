@@ -18,7 +18,7 @@ import { plural } from '../../utils/plural';
 import { StagesOpen } from './stagesOpen';
 import { StagesMatrix } from './stagesMatrix';
 import { CloseCircleOutlined, WarningOutlined } from '@ant-design/icons';
-import { normalizeSpeed, isSpeedDistributed, stagesSpeed } from './speedChecker';
+import { normalizeSpeed, isSpeedDistributed, stagesSpeed, speedOutOfRange } from './speedChecker';
 
 export const RESULT_CONDITION_OPTIONS: { value: ResultCondition; label: string }[] = [
   { value: 'competition', label: 'Соревнования' },
@@ -178,6 +178,13 @@ const AddResult = () => {
         return `Результат ${id + 1} не заполнен`;
       }
     }
+    const out = speedOutOfRange(normalizeSpeed(result, distance));
+    if (out >= 0) {
+      if (repeat === 0) {
+        return "Скорость не может быть быстрее 40 секунд на 100м и медленнее 6 минут на 100м";
+      }
+      return `Результат ${out + 1} вне диапазона допустимых значений`;
+    }
     for (const stage of stages) {
       let isEmpty = true;
       let isFilled = true;
@@ -198,6 +205,14 @@ const AddResult = () => {
       }
       if (stage.at(-1).result < 0) {
         return `Время в разбивке ${stages.indexOf(stage) + 1} не совпадает с результатом`;
+      }
+
+      const stageOut = speedOutOfRange(normalizeSpeed(result, distance));
+      if (stageOut >= 0) {
+        if (repeat === 0) {
+          return `Скорость на этапе ${stageOut + 1} вне диапазона допустимых значений`;
+        }
+        return `Скорость в разбивке ${stages.indexOf(stage) + 1} этапа вне диапазона допустимых значений`;
       }
     }
     return null;

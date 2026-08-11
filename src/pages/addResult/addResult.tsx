@@ -115,7 +115,7 @@ const AddResult = () => {
   // Выключаем открытую воду на коротких дистанциях
   useEffect(() => {
     if (distance < OPEN_MIN_DISTANCE) {
-      setWater('fifty');
+      setWater((water) => water === 'open' ? 'fifty' : water);
     }
   }, [distance]);
 
@@ -167,6 +167,9 @@ const AddResult = () => {
   );
 
   const errorMessage = (() => {
+    if (repeat === 0) {
+      return "Число повторений не задано";
+    }
     for (const [id, val] of result.entries()) {
       if (val === null) {
         if (repeat === 1) {
@@ -213,7 +216,7 @@ const AddResult = () => {
     }
     for (const [id, stage] of stages.entries()) {
       if (isSpeedDistributed(stagesSpeed(stage))) {
-        return `Скорости на этапе ${id + 1} сильно отличаются между собой`;
+        return `Скорости в разбивке на этапе ${id + 1} сильно отличаются между собой`;
       }
     }
     return null;

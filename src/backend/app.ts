@@ -39,7 +39,7 @@ export function createApp(db: Db) {
   app.route('/api/swimmers', swimmersRoutes(db));
   app.route('/api/teams', teamsRoutes(db));
   app.route('/api/results', resultsRoutes(db, authConfig));
-  app.route('/api/series', seriesRoutes(db));
+  app.route('/api/series', seriesRoutes(db, authConfig));
 
   app.notFound((c) => c.json({ error: 'Not found' }, 404));
 

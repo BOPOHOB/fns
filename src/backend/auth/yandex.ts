@@ -104,7 +104,7 @@ export async function fetchYandexUser(accessToken: string): Promise<AuthUser> {
   }
 
   const info = await res.json() as YandexUserInfo;
-  const email = info.default_email ?? info.emails?.[0];
+  const email = info.default_email ?? info.emails?.[0] ?? `${info.login.toLowerCase()}@yandex.ru`;
   const displayName = info.display_name || info.real_name || info.login;
 
   const user: AuthUser = {

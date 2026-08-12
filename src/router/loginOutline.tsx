@@ -10,6 +10,7 @@ import logo from './logo.jpg';
 
 const LoginOutline = observer(() => {
   const session = useSession();
+
   return (
     <>
       <header className={cn.head}>
@@ -34,7 +35,7 @@ const LoginOutline = observer(() => {
             ) : (
               <Avatar>{session.user.displayName.slice(0, 1)}</Avatar>
             )}
-            <Text>{session.user.displayName}</Text>
+            <Text className={cn.displayName}>{session.user.displayName}</Text>
             <Button onClick={() => void session.logout()}>Выйти</Button>
           </Space>
         ) : (

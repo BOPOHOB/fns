@@ -19,6 +19,7 @@ import { StagesOpen } from './stagesOpen';
 import { StagesMatrix } from './stagesMatrix';
 import { CloseCircleOutlined, WarningOutlined } from '@ant-design/icons';
 import { normalizeSpeed, isSpeedDistributed, stagesSpeed, speedOutOfRange } from './speedChecker';
+import clsx from "clsx";
 
 export const RESULT_CONDITION_OPTIONS: { value: ResultCondition; label: string }[] = [
   { value: 'competition', label: 'Соревнования' },
@@ -93,7 +94,6 @@ const AddResult = () => {
       setStages([[]]);
       return;
     }
-    console.log('steps',distance, stageInterval);
     const steps = Math.floor(distance / stageInterval);
     const stageConstructor = () => ({
       result: null,
@@ -104,11 +104,6 @@ const AddResult = () => {
 
   // Подравнять шаг
   useEffect(() => {
-    console.log(distance, stageInterval, isHaveMultiplicity(distance, stageInterval), ({
-      25: null,
-      50: null,
-      100: 50,
-    } as const)[distance] ?? 100)
     if (!isHaveMultiplicity(distance, stageInterval)) {
       setStageInterval(distance < 200 ? ({
         25: null,
@@ -186,7 +181,7 @@ const AddResult = () => {
     }
     const out = speedOutOfRange(normalizeSpeed(result, distance));
     if (out >= 0) {
-      if (repeat === 0) {
+      if (repeat === 1) {
         return "Скорость не может быть быстрее 40 секунд на 100м и медленнее 6 минут на 100м";
       }
       return `Результат ${out + 1} вне диапазона допустимых значений`;
@@ -209,7 +204,7 @@ const AddResult = () => {
           return 'Разбивка заполнена частично. Надо либо заполнить полностью либо оставить пустой';
         }
       }
-      if (stage.at(-1).result < 0) {
+      if (stage.at(-1)?.result < 0) {
         return `Время в разбивке ${stages.indexOf(stage) + 1} не совпадает с результатом`;
       }
 
@@ -316,10 +311,10 @@ const AddResult = () => {
         </>
       )}
       <div className={cn.scroll}>
-        <div className={cn.results}>
+        <div className={clsx(cn.results, stageInterval === null && cn.wrap)}>
           {
             result.map((v, id) => (
-              <TimeInput className={cn.input} tabIndex={id + 1} key={id} value={v} onChange={setResultItem(id)} placeholder={repeat === 1 ? 'Результат' : `${id + 1} повторение`} />
+              <TimeInput className={cn.input} tabIndex={id + 1} key={id} value={v} onChange={setResultItem(id)} placeholder={repeat === 1 ? 'Результат' : `${id + 1} повтор`} />
             ))
           }
         </div>

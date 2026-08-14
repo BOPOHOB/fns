@@ -51,7 +51,7 @@ const AddResult = () => {
   const results = useResults();
 
   const [distance, setDistance] = useStorageState<number>(200, 'addResult.distance');
-  const [date, setDate] = useStorageState<Dayjs>(() => dayjs(), 'addResult.date');
+  const [date, setDate] = useState<Dayjs>(() => dayjs());
   const [water, setWater] = useStorageState<WaterType>('quarter', 'addResult.water');
   const [repeat, setRepeat] = useStorageState<number>(1, 'addResult.repeat');
   const [result, setResult] = useState<Array<number | null>>(new Array(repeat).fill(null));

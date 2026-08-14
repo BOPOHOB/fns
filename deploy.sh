@@ -33,6 +33,7 @@ echo "==> Uploading to ${REMOTE}:${REMOTE_DIR}…"
 rsync -az --delete dist/ "${REMOTE}:${REMOTE_DIR}/dist/"
 rsync -az --delete src/backend/ "${REMOTE}:${REMOTE_DIR}/src/backend/"
 rsync -az --delete src/types/ "${REMOTE}:${REMOTE_DIR}/src/types/"
+rsync -az --delete src/shared/ "${REMOTE}:${REMOTE_DIR}/src/shared/"
 rsync -az --delete src/sql/ "${REMOTE}:${REMOTE_DIR}/src/sql/"
 scp deno.json deno.lock feelandswim.service feelAndSwim.ru "${REMOTE}:${REMOTE_DIR}/"
 

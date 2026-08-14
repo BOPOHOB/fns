@@ -8,17 +8,19 @@ import cn from './stagesMatrix.module.less';
 
 const StagesMatrix: FC<{
   value: StagesRawInput[];
-  onChange: (value: StagesRawInput[]) => void;
+  // Фактически строка и столбец передаются чтобы вывести результат если заполнены только этапы
+  onChange: (value: StagesRawInput[], repeat: number, stage: number) => void;
   step: Stage,
   inputClassName?: string;
   results: Array<number | null>;
-}> = ({ onChange, value, step, inputClassName, results }) => {
+  autoMinute?: boolean;
+}> = ({ onChange, value, step, inputClassName, results, autoMinute=false }) => {
   const matrix: Array<ReactElement> = [];
 
   const onStageChange = (colIdx: number, index: number) => (val: null | number) => {
     const next = structuredClone(value);
     next[colIdx][index].result = val;
-    onChange(next);
+    onChange(next, colIdx, index);
   };
 
   const rows = (value.at(0)?.reduce((prw, cur) => cur.distance + prw, 0) ?? 0) / step;
@@ -41,12 +43,15 @@ const StagesMatrix: FC<{
     const acceptor = repeat[index];
     acceptor.distance += s.distance;
     acceptor.result = acceptor.result === null && s.result === null ? null : ((s.result ?? 0) + (acceptor.result ?? 0));
-    onChange(next);
+    onChange(next, colIdx, index);
   };
 
+  // Заполнение последней строки
   useEffect(() => {
     const next = structuredClone(value);
     let isChanged = false;
+    let row = -1;
+    let col = -1;
     for (let i = 0; i < next.length; ++i) {
       let isReady = results[i] !== null;
       for (let j = 0; j < next[i].length - 1; ++j) {
@@ -63,11 +68,13 @@ const StagesMatrix: FC<{
       } else if (next[i].length > 0 && next[i].at(-1).result !== null) {
         isChanged = true;
         next[i].at(-1).result = null;
+        col = i;
+        row = next[i].length - 1;
       }
     }
 
     if (isChanged) {
-      onChange(next);
+      onChange(next, col, row);
     }
   }, [results, value]);
 
@@ -82,9 +89,9 @@ const StagesMatrix: FC<{
         matrix.push(
           <div key={`${row}_${col}`} style={style}>
             <TimeInput
-              disabled={index + 1 === repeat.length}
               className={inputClassName}
               tabIndex={col + 1}
+              autoMinute={autoMinute}
               placeholder={span === 1 ? `${row + 1} этап` : `${row + 1} - ${row + span} этапы`}
               onChange={onStageChange(col, index)}
               value={repeat[index].result}

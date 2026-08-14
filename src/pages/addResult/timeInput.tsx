@@ -32,8 +32,8 @@ function isValidTimeInput(input: string): boolean {
   return val !== null && val > 0;
 }
 
-const TimeInput: FC<Omit<InputProps, 'value' | 'onChange' | 'status'> & { value: number | null, onChange: ((v: number | null) => void) }> = 
-({ value, onChange, ...spread }) => {
+const TimeInput: FC<Omit<InputProps, 'value' | 'onChange' | 'status'> & { autoMinute?: boolean; value: number | null, onChange: ((v: number | null) => void) }> = 
+({ value, onChange, autoMinute = false, ...spread }) => {
   const [input, setInput] = useState(stringifySeconds(value));
   const status: InputProps['status'] = isValidTimeInput(input) || input === '' ? (value < 0 ? 'error' : undefined) : 'warning';
 
@@ -48,6 +48,13 @@ const TimeInput: FC<Omit<InputProps, 'value' | 'onChange' | 'status'> & { value:
   return (
     <Input
       ref={ref}
+      onFocus={(e) => {
+        if (autoMinute && input === '') {
+          setInput('1:');
+          e.target.setSelectionRange(2, 2);
+        }
+        spread.onFocus?.(e);
+      }}
       status={status}
       onChange={(e) => { setInput(e.target.value); onChange(parseTimeInput(e.target.value)); }}
       value={input}

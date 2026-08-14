@@ -9,6 +9,7 @@ import { distanceName } from '../addResult/distanceSelect';
 import type { ResultCondition, Stages, WaterType } from '../../types/result';
 
 import cn from './swimmer.module.less';
+import { PlusOutlined } from '@ant-design/icons';
 
 type ResultRow = {
   key: number;
@@ -51,8 +52,10 @@ function renderStages(stages: Stages) {
       {stages.map((stage, i) => (
         <li key={`${stage.distance}-${i}`}>
           <span>{distanceName(stage.distance, true)}</span>
-          <span>{stringifySeconds(stage.result)}</span>
-          <span>{formatSpeed(stage.distance, stage.result)}</span>
+          <span>{[
+            stringifySeconds(stage.result),
+            stage.distance !== 100 && `(${stringifySeconds(stage.result * 100 / stage.distance)})`
+          ].filter(Boolean).join(' ')}</span>
         </li>
       ))}
     </ul>
@@ -118,6 +121,9 @@ const Swimmer = observer(() => {
     <div className={cn.page}>
       <Button type="link" className={cn.back}>
         <Link to="/">← Назад</Link>
+      </Button>
+      <Button icon={<PlusOutlined />} type="link" className={cn.back}>
+        <Link to="add">Добавить результат</Link>
       </Button>
       <Typography.Title level={3}>{swimmer.name}</Typography.Title>
       <Typography.Paragraph type="secondary">

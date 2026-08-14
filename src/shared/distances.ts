@@ -8,8 +8,9 @@ export const DISTANCE_CATEGORY_OPTIONS: { value: DistanceCategory; label: string
   { value: 'open', label: 'Открытая вода' },
 ];
 
-const POOL_DISTANCES = [25, 50, 100, 200, 400, 500, 800, 1000, 1500];
+const POOL_DISTANCES = [25, 50, 100, 200, 300, 400, 500, 800, 1000, 1500];
 const OPEN_WATER_DISTANCES = [500, 1000, 2000, 3000, 5000, 10000, 1852, 1852 * 2];
+const ALLOWED_DISTANCES = new Set([...POOL_DISTANCES, ...OPEN_WATER_DISTANCES]);
 
 /** Какие колонки дистанций показывать по выбранным типам бассейна. */
 function distancesForCategories(
@@ -47,4 +48,4 @@ function resultMatchesDistanceCategories(
   return true;
 }
 
-export { distancesForCategories, resultMatchesDistanceCategories };
+export { distancesForCategories, resultMatchesDistanceCategories, ALLOWED_DISTANCES };

@@ -1,5 +1,6 @@
 import { useCallback, useRef } from "react";
 import { useStorageState } from "../../utils/useStorageState";
+import { useLatest } from "../../utils/useLatest";
 
 type IntervalState = {
   interval: number | null,
@@ -16,13 +17,9 @@ const useSeriesController = (): IntervalState => {
   const [pause, setPause] = useStorageState<number | null>(null, 'addResult.pause');
   const lastInput = useRef<'speed' | 'interval' | 'pause'>(null);
   const prevInput = useRef<'speed' | 'interval' | 'pause'>(null);
-  const intervalRef = useRef(null);
-  const speedRef = useRef(null);
-  const pauseRef = useRef(null);
-
-  intervalRef.current = interval;
-  speedRef.current = speed;
-  pauseRef.current = pause;
+  const intervalRef = useLatest(interval);
+  const speedRef = useLatest(speed);
+  const pauseRef = useLatest(pause);
 
   const intervalHolder = useCallback((intervalValue: null | number) => {
     setInterval(intervalValue);

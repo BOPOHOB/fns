@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Button, DatePicker, Radio, Typography, Space, Alert, InputNumber, Tooltip } from 'antd';
+import { useCallback, useEffect, useState } from 'react';
+import { Button, DatePicker, Radio, Typography, Space, Alert, InputNumber, Tooltip, Checkbox } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { Link, useNavigate } from 'react-router';
 import type { ResultCondition, WaterType } from '../../types/result';
@@ -20,6 +20,7 @@ import { StagesMatrix } from './stagesMatrix';
 import { CloseCircleOutlined, WarningOutlined } from '@ant-design/icons';
 import { normalizeSpeed, isSpeedDistributed, stagesSpeed, speedOutOfRange } from './speedChecker';
 import clsx from "clsx";
+import { useLatest } from '../../utils/useLatest';
 
 export const RESULT_CONDITION_OPTIONS: { value: ResultCondition; label: string }[] = [
   { value: 'competition', label: 'Соревнования' },
@@ -63,6 +64,7 @@ const AddResult = () => {
   const [notes, setNotes] = useState('');
   const [stages, setStages] = useState<StagesRawInput[]>([[]]);
   const [stageInterval, setStageInterval] = useStorageState<Stage | null>(100, 'addResult.stage');
+  const [autoMinute, setAutoMinute] = useStorageState<boolean>(true, 'addResult.lessTwo');
 
   const setResultItem = (id: number) => (value: number | null) => {
     const newResult = [...result];
@@ -75,6 +77,18 @@ const AddResult = () => {
     newStages[repeatId] = value;
     setStages(newStages);
   };
+
+  const resultRef = useLatest(result);
+  const onMatrixChange = useCallback((value: StagesRawInput[], repeat: number) => {
+    // На саму матрицу мы тут не влияем
+    setStages(value);
+    // Если сработало автозаполнение но пользователь продолжает что-то вводить то всё-равно меняем время, так что проверять значение в results не нужно
+    if (value[repeat].find((v) => v.result === null) === undefined) {
+      const next = [...resultRef.current];
+      next[repeat] = value[repeat].reduce((prw, cur) => prw + cur.result, 0);
+      setResult(next);
+    }
+  }, []);
 
   // Выключаем серии на открытой воде
   useEffect(() => {
@@ -158,13 +172,18 @@ const AddResult = () => {
   }
 
   const stagesSelector = (
-    <Radio.Group
-      className={cn.waterSelector}
-      optionType="button"
-      value={stageInterval ?? 0}
-      onChange={(e) => {setStageInterval(e.target.value === 0 ? null : e.target.value);}}
-      options={STAGE_INTERVALS.map(v => ({ ...v, disabled: !isHaveMultiplicity(distance, v.value) }))}
-    />
+    <div className={cn.row}>
+      <Radio.Group
+        className={cn.waterSelector}
+        optionType="button"
+        value={stageInterval ?? 0}
+        onChange={(e) => {setStageInterval(e.target.value === 0 ? null : e.target.value);}}
+        options={STAGE_INTERVALS.map(v => ({ ...v, disabled: !isHaveMultiplicity(distance, v.value) }))}
+      />
+      <Tooltip title="Добавлять сразу 1: при простановке разбивки, если пловец плывёт в диапазоне от 1 до 2 минут на сотню"> 
+        <Checkbox checked={autoMinute} onChange={(e) => {setAutoMinute(e.target.checked); console.log(e.target.checked)}}>1:....</Checkbox>
+      </Tooltip>
+    </div>
   );
 
   const errorMessage = (() => {
@@ -321,7 +340,7 @@ const AddResult = () => {
         {water !== 'open' && stageInterval !== null && stagesSelector}
         {
           water === 'open' ? <StagesOpen target={result[0]} value={stages[0]} onChange={setRepeatStages(0)} distance={distance} />
-          : (stageInterval !== null && <StagesMatrix results={result} inputClassName={cn.input} step={stageInterval} value={stages} onChange={setStages} />)
+          : (stageInterval !== null && <StagesMatrix autoMinute={autoMinute} results={result} inputClassName={cn.input} step={stageInterval} value={stages} onChange={onMatrixChange} />)
         }
       </div>
       {water !== 'open' && stageInterval === null && stagesSelector}

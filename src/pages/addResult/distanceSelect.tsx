@@ -1,25 +1,10 @@
 import { Select } from "antd";
 import { plural } from "../../utils/plural";
 import type { FC } from "react";
+import { ALLOWED_DISTANCES } from "../../shared/distances";
 
 const MILE = 1852;
-const DISTANCES = [
-  25,
-  50,
-  100,
-  200,
-  400,
-  500,
-  800,
-  1000,
-  1500,
-  2000,
-  3000,
-  5000,
-  10000,
-  MILE,
-  MILE * 2,
-]
+const DISTANCES = Array.from(ALLOWED_DISTANCES.values()).sort((a, b) => a - b);
 
 const distanceName = (distance: number, short: boolean = false) => {
   if (distance < 1000) {

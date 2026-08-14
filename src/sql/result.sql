@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS "result" (
   "swimmer_id" INTEGER NOT NULL,
   "result" INTEGER NOT NULL,
   "distance" INTEGER NOT NULL CHECK ("distance" IN (
-    25, 50, 100, 200, 400, 500, 800, 1000, 1500,
+    25, 50, 100, 200, 300, 400, 500, 800, 1000, 1500,
     2000, 3000, 5000, 10000, 1852, 3704
   )),
   "date" TEXT NOT NULL,

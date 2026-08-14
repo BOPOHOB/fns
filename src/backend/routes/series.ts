@@ -5,15 +5,11 @@ import { resolveNonSwimmerUser } from '../auth/session.ts';
 import { mapResult, mapSeries, type ResultRow, type SeriesRow } from '../mappers.ts';
 import type { Result, ResultCondition, Stages, WaterType } from '../../types/result.ts';
 import type { ResultSeries } from '../../types/resultSeries.ts';
+import { ALLOWED_DISTANCES } from "@shared/distances.ts";
 
 const RESULT_COLUMNS = `
   id, swimmer_id, result, distance, date, type, stages, notes, series_id, water
 `;
-
-const ALLOWED_DISTANCES = new Set([
-  25, 50, 100, 200, 400, 500, 800, 1000, 1500,
-  2000, 3000, 5000, 10000, 1852, 3704,
-]);
 
 const ALLOWED_TYPES = new Set<ResultCondition>(['competition', 'test', 'workout']);
 const ALLOWED_WATER = new Set<WaterType>(['quarter', 'fifty', 'open']);

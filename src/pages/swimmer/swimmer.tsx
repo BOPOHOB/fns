@@ -5,6 +5,7 @@ import { observer } from 'mobx-react';
 import { useSwimmer } from '../../router/swimmerOutline';
 import { useResults } from '../../model/results';
 import { stringifySeconds } from '../../utils/stringifySeconds';
+import { formatRuDate } from '../../utils/formatRuDate';
 import { distanceName } from '../addResult/distanceSelect';
 import type { ResultCondition, Stages, WaterType } from '../../types/result';
 
@@ -34,11 +35,6 @@ const WATER_LABEL: Record<WaterType, string> = {
   quarter: '25м',
   open: 'Открытая вода',
 };
-
-const MONTHS = [
-  'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
-  'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря',
-];
 
 function formatSpeed(distance: number, seconds: number): string {
   if (!distance) return '—';
@@ -78,9 +74,7 @@ const Swimmer = observer(() => {
       distance: r.distance,
       time: stringifySeconds(r.result),
       speed: formatSpeed(r.distance, r.result),
-      date: r.date.isValid()
-        ? `${r.date.date()} ${MONTHS[r.date.month()]} ${r.date.year()}`
-        : undefined,
+      date: r.date.isValid() ? formatRuDate(r.date) : undefined,
       water: r.water,
       condition: r.condition,
       stages: r.stages,

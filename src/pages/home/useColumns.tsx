@@ -14,6 +14,7 @@ import cn from './columns.module.less';
 import type { Result } from "../../model/result";
 import type { ResultCondition } from "../../types/result";
 import { stringifySeconds } from "../../utils/stringifySeconds";
+import { formatRuDate } from "../../utils/formatRuDate";
 import clsx from "clsx";
 
 const CONDITION_TOOL_TIP = {
@@ -37,7 +38,7 @@ function renderResult(entry: Result, markers: ReactNode[]) {
         title={
           [
             entry.date
-              ? `Установлен ${entry.date.format('DD mmm YYYY')} года`
+              ? `Установлен ${formatRuDate(entry.date)} года`
               : 'Дата фиксации результата не указана'
             ,
             conditionTooltip(condition),

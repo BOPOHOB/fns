@@ -4,12 +4,11 @@ import { useModel } from '../utils/useModel.ts';
 import { AuthCallback } from '../pages/AuthCallback.tsx';
 import { LoginOutline } from './loginOutline.tsx';
 import { Results, ResultsProvider } from '../model/results.ts';
-import { AddResult } from '../pages/addResult/addResult.tsx';
 import { AddSwimmer } from '../pages/addSwimmer/addSwimmer.tsx';
 import { Teams } from '../pages/teams/teams.tsx';
 import { AddTeam } from '../pages/teams/addTeam.tsx';
-import { Swimmer } from '../pages/swimmer/swimmer.tsx';
-import { SwimmerOutline } from './swimmerOutline.tsx';
+import { SegmentOutline } from './segmentOutline.tsx';
+import { SegmentAdd, SegmentIndex } from './segmentPages.tsx';
 import { Home } from '../pages/home/home.tsx';
 
 function Router() {
@@ -30,9 +29,9 @@ function Router() {
               <Route path="/swimmers/add" element={<AddSwimmer />} />
               <Route path="/teams" element={<Teams />} />
               <Route path="/teams/add" element={<AddTeam />} />
-              <Route path="/:swimmerId" element={<SwimmerOutline />}>
-                <Route element={<AddResult />} path="/:swimmerId/add" />
-                <Route element={<Swimmer />} path="/:swimmerId" />
+              <Route path="/:segment" element={<SegmentOutline />}>
+                <Route index element={<SegmentIndex />} />
+                <Route path="add" element={<SegmentAdd />} />
               </Route>
               <Route path="*" element={<Home />} />
             </Route>

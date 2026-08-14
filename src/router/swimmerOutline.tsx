@@ -15,8 +15,8 @@ const useSwimmer = () => {
 
 const SwimmerOutline = observer(() => {
   const results = useResults();
-  const { swimmerId } = useParams<{ swimmerId: string }>();
-  const swimmer = results.swimmersMap.get(Number(swimmerId));
+  const { segment } = useParams<{ segment: string }>();
+  const swimmer = results.swimmersMap.get(Number(segment));
 
   if (results.isLoading) {
     return <Spin />;
@@ -25,7 +25,7 @@ const SwimmerOutline = observer(() => {
   if (swimmer === undefined) {
     return (
       <Alert style={{margin: 30}} showIcon type="warning"
-        title={`Пловец с идентификатором ${swimmerId} не найден`}
+        title={`Пловец с идентификатором ${segment} не найден`}
         description={<Link to="/">Вернуться к таблице результатов</Link>}
       />
     );

@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import type { ResultCondition, Result as ResultJSON } from "../types/result";
 import type { Results } from "./results";
+import { distanceName } from "../pages/addResult/distanceSelect";
 
 class Result {
   readonly #model: WeakRef<Results>;
@@ -13,12 +14,24 @@ class Result {
     return this.data.id;
   }
 
+  get key() {
+    return this.data.id;
+  }
+
+  get speed() {
+    return this.data.result / this.data.distance * 100;
+  }
+
   get result() {
     return this.data.result;
   }
 
   get distance() {
     return this.data.distance;
+  }
+
+  get distanceName() {
+    return distanceName(this.distance);
   }
 
   get swimmerId() {

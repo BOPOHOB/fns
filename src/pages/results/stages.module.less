@@ -1,0 +1,30 @@
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  float:left;
+  background-color: #9FADB7;
+}
+
+.stages {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: auto auto;
+  gap: 1px;justify-content: start;
+  background-color: #AFCDE7;
+  float: left;
+
+  .cell {
+    box-sizing: border-box;
+    font-weight: normal;
+    overflow: hidden;
+    text-align: center;
+    background-color: #D8E6F3;
+    transition: background-color 0.2s;
+    width: 70px;
+
+    &:hover {
+      background-color: #AFCDE7;
+    }
+  }
+}

@@ -1,12 +1,12 @@
 import type { ColumnsType } from 'antd/es/table';
 import { Link } from 'react-router';
-import { Fragment } from 'react';
-import { stringifySeconds } from '../../utils/stringifySeconds';
-import type { ResultCondition, Stages, WaterType } from '../../types/result';
+import type { ResultCondition, WaterType } from '../../types/result';
 import type { Result } from '../../model/result';
 
-import cn from './resultsColumns.module.less';
 import type { Swimmer } from '../../model/swimmer';
+import type { Dayjs } from 'dayjs';
+import { formatRuDate } from '../../utils/formatRuDate';
+import { ResultBadge, StagesBadge } from './stages';
 
 const CONDITION_LABEL: Record<ResultCondition | 'open', string> = {
   competition: 'Соревнования',
@@ -21,35 +21,7 @@ const WATER_LABEL: Record<WaterType, string> = {
   open: 'Открытая вода',
 };
 
-function renderStages(stages: Stages, result: Result) {
-  if (!stages.length) {
-    return (
-      <div className={cn.stages}>
-        <div className={cn.cell}>{result.distanceName}</div>
-        <div className={cn.cell}>{stringifySeconds(result.result)}</div>
-      </div>
-    );
-  }
-  return (
-    <div className={cn.stages}>
-      {stages.map((stage, i) => (
-        <Fragment key={i}>
-          <div className={cn.cell}>{stages.slice(0, i + 1).reduce((sum, v) => sum + v.distance, 0)}</div>
-          <div className={cn.cell}>{stringifySeconds(stage.result)}</div>
-        </Fragment>
-      ))}
-    </div>
-  );
-}
-
-const renderResult = (_: never, result: Result) => {
-  return (
-    <div className={cn.stages}>
-      <div className={cn.cell}>{stringifySeconds(result.result)}</div>
-      <div className={cn.cell}>{stringifySeconds(result.speed)}</div>
-    </div>
-  );
-};
+const renderStages = (_: never, result: Result) => <StagesBadge result={result} />
 
 const c = function<T>(condition: boolean, value: T): [] | [T] { return condition ? [value] : []; };
 
@@ -62,7 +34,7 @@ function useResultsColumns(kind: 'swimmer' | 'day'): ColumnsType<Result> {
         <Link to={`/${swimmer.id}`}>{swimmer.name}</Link>
       ),
     }),
-    { title: 'Результат', dataIndex: 'time', width: 100, render: renderResult },
+    { title: 'Результат', dataIndex: 'time', render: (_: never, result: Result) => <ResultBadge result={result} /> },
     {
       title: 'Разбивка',
       dataIndex: 'stages',
@@ -71,10 +43,10 @@ function useResultsColumns(kind: 'swimmer' | 'day'): ColumnsType<Result> {
     ...c(kind === 'swimmer', {
       title: 'Дата',
       dataIndex: 'date',
-      render: (v?: string) => v ?? '—',
+      render: (v?: Dayjs) => formatRuDate(v) ?? '—',
     }),
     {
-      title: 'Тип бассейна',
+      title: 'Вода',
       dataIndex: 'water' as const,
       render: (v: WaterType) => WATER_LABEL[v],
     },

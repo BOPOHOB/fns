@@ -50,6 +50,10 @@ class Result {
     return dayjs(this.data.date);
   }
 
+  get stageStep() {
+    return this.data.stages.reduce((prw, cur) => Math.min(prw, cur.distance), Infinity);
+  }
+
   get condition(): ResultCondition | 'open' {
     if (this.data.water === 'open') {
       return 'open';

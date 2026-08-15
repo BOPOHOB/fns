@@ -1,4 +1,4 @@
-import { Button, Table, Typography } from 'antd';
+import { Button, Typography } from 'antd';
 import { Link } from 'react-router';
 import { observer } from 'mobx-react';
 import dayjs from 'dayjs';
@@ -8,6 +8,7 @@ import { formatRuDate } from '../../utils/formatRuDate';
 import { useResultsColumns } from '../results/useResultsColumns';
 
 import cn from './day.module.less';
+import { CommonTable } from '../../components/commonTable';
 
 const Day = observer(() => {
   const day = useDay();
@@ -26,14 +27,7 @@ const Day = observer(() => {
       <Typography.Title level={3}>
         Результаты за {titleDate.isValid() ? formatRuDate(titleDate) : day}
       </Typography.Title>
-      <Table
-        size="small"
-        pagination={false}
-        columns={columns}
-        dataSource={rows}
-        locale={{ emptyText: 'Нет результатов' }}
-        scroll={{ x: 'max-content' }}
-      />
+      <CommonTable columns={columns} dataSource={rows} />
     </div>
   );
 });

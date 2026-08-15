@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react';
-import { Button, Popconfirm, Spin, Table, Tooltip } from 'antd';
+import { Button, Popconfirm, Spin, Tooltip } from 'antd';
 import { useNavigate } from 'react-router';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { useResults } from '../../model/results';
@@ -7,6 +7,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { AsyncSelect } from '../../components/asyncSelect';
 
 import cn from './teams.module.less';
+import { CommonTable } from '../../components/commonTable';
 
 type Row = {
   key: number;
@@ -105,7 +106,7 @@ const Teams = observer(() => {
         </Button>
       </div>
       <Spin spinning={results.isLoading}>
-        <Table columns={columns} dataSource={rows} pagination={false} scroll={{ x: 'max-content' }} />
+        <CommonTable columns={columns} dataSource={rows} />
       </Spin>
     </div>
   );

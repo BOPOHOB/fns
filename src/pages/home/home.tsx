@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react';
-import { Table, Spin } from 'antd';
+import { Spin } from 'antd';
 import { useColumns } from './useColumns';
 import { useResults } from '../../model/results';
 import { FiltersBar } from './filters';
@@ -13,6 +13,7 @@ import type { Result } from '../../model/result';
 import type { Swimmer } from '../../model/swimmer';
 
 import cn from './home.module.less';
+import { CommonTable } from '../../components/commonTable';
 
 function bestResult(list: Result[]): Result | undefined {
   if (!list.length) return undefined;
@@ -81,7 +82,7 @@ const Home = observer(() => {
     <div className={cn.page}>
       <FiltersBar />
       <Spin spinning={results.isLoading}>
-        <Table columns={columns} dataSource={rows} pagination={false} scroll={{ x: 'max-content' }} />
+        <CommonTable columns={columns} dataSource={rows} />
       </Spin>
     </div>
   );

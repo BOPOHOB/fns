@@ -66,8 +66,7 @@ const useColumns = (): ColumnsType<Swimmer["row"]> => {
       dataIndex: 'name',
       key: 'name',
       className: cn.name,
-      width: 200,
-      fixed: 'left',
+      width: 100,
       render: (name, swimmer) => [
         <Link className={cn.text} key="name" to={`/${swimmer.id}`}>{name}</Link>,
         session.isTrainer && (

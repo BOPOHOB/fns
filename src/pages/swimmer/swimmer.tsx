@@ -1,4 +1,4 @@
-import { Button, DatePicker, Input, Space, Table, Typography } from 'antd';
+import { Button, DatePicker, Input, Space, Typography } from 'antd';
 import { Link } from 'react-router';
 import { observer } from 'mobx-react';
 import dayjs, { type Dayjs } from 'dayjs';
@@ -10,6 +10,7 @@ import { PlusOutlined } from '@ant-design/icons';
 import { useResultsColumns } from '../results/useResultsColumns';
 
 import cn from './swimmer.module.less';
+import { CommonTable } from '../../components/commonTable';
 
 const NAME_SAVE_DEBOUNCE_MS = 2000;
 
@@ -99,14 +100,7 @@ const Swimmer = observer(() => {
           )}
         </Space>
       </Typography.Paragraph>
-      <Table
-        size="small"
-        pagination={false}
-        columns={columns}
-        dataSource={rows}
-        locale={{ emptyText: 'Нет результатов' }}
-        scroll={{ x: 'max-content' }}
-      />
+      <CommonTable columns={columns} dataSource={rows} />
     </div>
   );
 });

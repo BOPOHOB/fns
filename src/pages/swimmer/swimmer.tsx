@@ -43,6 +43,7 @@ const Swimmer = observer(() => {
         columns={columns}
         dataSource={rows}
         locale={{ emptyText: 'Нет результатов' }}
+        scroll={{ x: 'max-content' }}
       />
     </div>
   );

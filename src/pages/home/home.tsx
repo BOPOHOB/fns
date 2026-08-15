@@ -81,7 +81,7 @@ const Home = observer(() => {
     <div className={cn.page}>
       <FiltersBar />
       <Spin spinning={results.isLoading}>
-        <Table columns={columns} dataSource={rows} pagination={false} />
+        <Table columns={columns} dataSource={rows} pagination={false} scroll={{ x: 'max-content' }} />
       </Spin>
     </div>
   );

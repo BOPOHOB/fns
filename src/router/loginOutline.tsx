@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { Menu } from "./menu";
 import BurgerRotate from '@animated-burgers/burger-rotate';
 import '@animated-burgers/burger-rotate/dist/styles.css';
+import { useMediaQuery } from "../utils/useMediaQuery";
 
 function resolveCjsDefault<T>(mod: T | { default: T | { default: T } }): T {
   let current: unknown = mod;
@@ -23,29 +24,42 @@ function resolveCjsDefault<T>(mod: T | { default: T | { default: T } }): T {
 
 const Burger = resolveCjsDefault(BurgerRotate);
 
+/** Keep in sync with @phone-nav-width in loginOutline.module.less */
+const PHONE_NAV_QUERY = "(max-width: 991px)";
+
 const LoginOutline = observer(() => {
   const session = useSession();
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
+  const isPhoneNav = useMediaQuery(PHONE_NAV_QUERY);
+
   useEffect(() => {
     setOpen(false);
-  }, [pathname])
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!isPhoneNav) setOpen(false);
+  }, [isPhoneNav]);
 
   return (
     <>
       <header className={cn.head}>
-        <Burger
-          Component="button"
-          aria-label="Меню"
-          className={cn.burger}
-          isOpen={open}
-          onClick={() => setOpen((v) => !v)}
-        />
+        {isPhoneNav && (
+          <Burger
+            Component="button"
+            aria-label="Меню"
+            className={cn.burger}
+            isOpen={open}
+            onClick={() => setOpen((v) => !v)}
+          />
+        )}
         <nav>
           <Link to="/"><img src={logo} alt="logo" /></Link>
-          <div className={cn.menu}>
-            <Menu mode="horizontal" />
-          </div>
+          {!isPhoneNav && (
+            <div className={cn.menu}>
+              <Menu mode="horizontal" />
+            </div>
+          )}
         </nav>
 
         <div className={cn.headerRight}>
@@ -77,15 +91,18 @@ const LoginOutline = observer(() => {
         ) : (
           <main>
             <Outlet />
-            <Drawer
-              placement="left"
-              closable={false}
-              onClose={() => setOpen(false)}
-              open={open}
-              getContainer={false}
-            >
-              <Menu mode="inline" />
-            </Drawer>
+            {isPhoneNav && (
+              <Drawer
+                className={cn.drawer}
+                placement="left"
+                closable={false}
+                onClose={() => setOpen(false)}
+                open={open}
+                getContainer={false}
+              >
+                <Menu mode="inline" />
+              </Drawer>
+            )}
           </main>
         )
       }

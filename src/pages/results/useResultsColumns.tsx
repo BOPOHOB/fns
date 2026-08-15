@@ -29,10 +29,11 @@ function useResultsColumns(kind: 'swimmer' | 'day'): ColumnsType<Result> {
     ...c(kind === 'day', {
       title: 'Пловец',
       dataIndex: 'swimmer',
+      fixed: 'left',
       render: (swimmer: Swimmer) => (
         <Link to={`/${swimmer.id}`}>{swimmer.name}</Link>
       ),
-    }),
+    } as const),
     { title: 'Результат', dataIndex: 'time', render: (_: never, result: Result) => <ResultBadge result={result} /> },
     {
       title: 'Разбивка',

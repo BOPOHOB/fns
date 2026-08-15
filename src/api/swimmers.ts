@@ -15,4 +15,16 @@ const submitSwimmer = (body: CreateSwimmerBody) =>
     body: JSON.stringify(body),
   });
 
-export { submitSwimmer, type CreateSwimmerBody };
+const setSwimmerBirthDate = (swimmerId: number, birthDate: string | null) =>
+  apiFetch<{ birthDate: string | null }>(`/api/swimmers/${swimmerId}/birth-date`, {
+    method: 'PUT',
+    body: JSON.stringify({ birthDate }),
+  });
+
+const setSwimmerName = (swimmerId: number, name: string) =>
+  apiFetch<{ name: string }>(`/api/swimmers/${swimmerId}/name`, {
+    method: 'PUT',
+    body: JSON.stringify({ name }),
+  });
+
+export { submitSwimmer, setSwimmerBirthDate, setSwimmerName, type CreateSwimmerBody };

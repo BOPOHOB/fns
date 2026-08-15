@@ -5,7 +5,7 @@ import { ResultSeries } from './resultSeries';
 import { Team } from './team';
 import { createContext, useContext } from "react";
 import { getResults, submitResult } from "../api/results";
-import { submitSwimmer, type CreateSwimmerBody } from "../api/swimmers";
+import { submitSwimmer, setSwimmerBirthDate, setSwimmerName, type CreateSwimmerBody } from "../api/swimmers";
 import { submitTeam, setTeamMembers, setTeamTrainer, deleteTeam, type CreateTeamBody } from "../api/teams";
 
 class Results {
@@ -38,6 +38,8 @@ class Results {
       addTeam: action,
       setTeamMembers: action,
       setTeamTrainer: action,
+      setSwimmerBirthDate: action,
+      setSwimmerName: action,
       deleteTeam: action,
       distances: computed,
       summaryTableRows: computed,
@@ -132,6 +134,22 @@ class Results {
     runInAction(() => {
       const team = this.teams.find((t) => t.id === teamId);
       team?.setTrainerId(saved);
+    });
+  }
+
+  async setSwimmerBirthDate(swimmerId: number, birthDate: string | null) {
+    const { birthDate: saved } = await setSwimmerBirthDate(swimmerId, birthDate);
+    runInAction(() => {
+      const swimmer = this.swimmers.find((s) => s.id === swimmerId);
+      swimmer?.setBirthDate(saved ?? undefined);
+    });
+  }
+
+  async setSwimmerName(swimmerId: number, name: string) {
+    const { name: saved } = await setSwimmerName(swimmerId, name);
+    runInAction(() => {
+      const swimmer = this.swimmers.find((s) => s.id === swimmerId);
+      swimmer?.setName(saved);
     });
   }
 

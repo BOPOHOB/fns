@@ -67,6 +67,7 @@ const useColumns = (): ColumnsType<Swimmer["row"]> => {
       key: 'name',
       className: cn.name,
       width: 200,
+      fixed: 'left',
       render: (name, swimmer) => [
         <Link className={cn.text} key="name" to={`/${swimmer.id}`}>{name}</Link>,
         session.isTrainer && (

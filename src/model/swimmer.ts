@@ -9,14 +9,22 @@ dayjs.extend(customParseFormat);
 class Swimmer {
   readonly #model: WeakRef<Results>;
   teamId: number[];
+  birthDate: string | undefined;
+  name: string;
 
   constructor(private readonly data: SwimmerJSON, model: Results) {
     this.#model = new WeakRef(model);
     this.teamId = [...data.teamId];
+    this.birthDate = data.birthDate;
+    this.name = data.name;
 
     makeObservable(this, {
       teamId: observable,
+      birthDate: observable,
+      name: observable,
       setTeamIds: action,
+      setBirthDate: action,
+      setName: action,
       bestSex: computed,
       bestGroup: computed,
       sexEmoji: computed,
@@ -31,6 +39,14 @@ class Swimmer {
     this.teamId = [...ids];
   }
 
+  setBirthDate(date: string | undefined) {
+    this.birthDate = date;
+  }
+
+  setName(name: string) {
+    this.name = name;
+  }
+
   get key() {
     return this.data.id;
   }
@@ -39,18 +55,10 @@ class Swimmer {
     return this.data.id;
   }
 
-  get name() {
-    return this.data.name;
-  }
-
-  get birthDate() {
-    return this.data.birthDate;
-  }
-
   get age(): number | undefined {
-    if (!this.data.birthDate) return undefined;
+    if (!this.birthDate) return undefined;
 
-    const birth = dayjs(this.data.birthDate, 'YYYY-MM-DD', true);
+    const birth = dayjs(this.birthDate, 'YYYY-MM-DD', true);
     if (!birth.isValid()) return undefined; 
 
     const age = dayjs().diff(birth, 'year');

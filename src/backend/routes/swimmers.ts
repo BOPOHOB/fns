@@ -152,5 +152,90 @@ export function swimmersRoutes(db: Db, authConfig: AuthConfig | null) {
     return c.json(mapSwimmer(row, teamId));
   });
 
+  app.put('/:id/birth-date', async (c) => {
+    const auth = await resolveNonSwimmerUser(c, authConfig, db);
+    if (!auth.ok) {
+      return c.json({ error: auth.error }, auth.status);
+    }
+
+    const id = Number(c.req.param('id'));
+    if (!Number.isInteger(id) || id < 1) {
+      return c.json({ error: 'Invalid id' }, 400);
+    }
+
+    const existing = db
+      .prepare(`SELECT id FROM swimmer WHERE id = ?`)
+      .get(id) as { id: number } | undefined;
+    if (!existing) return c.json({ error: 'Not found' }, 404);
+
+    let body: unknown;
+    try {
+      body = await c.req.json();
+    } catch {
+      return c.json({ error: 'Invalid JSON body' }, 400);
+    }
+
+    if (typeof body !== 'object' || body === null) {
+      return c.json({ error: 'Invalid JSON body' }, 400);
+    }
+
+    const raw = body as Record<string, unknown>;
+    let birthDate: string | null = null;
+    if (raw.birthDate !== undefined && raw.birthDate !== null && raw.birthDate !== '') {
+      if (typeof raw.birthDate !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(raw.birthDate)) {
+        return c.json({ error: 'Invalid birthDate' }, 400);
+      }
+      birthDate = raw.birthDate;
+    }
+
+    try {
+      db.prepare(`UPDATE swimmer SET birth_date = ? WHERE id = ?`).run(birthDate, id);
+      return c.json({ birthDate });
+    } catch (e) {
+      return c.json({ error: e instanceof Error ? e.message : 'Update failed' }, 500);
+    }
+  });
+
+  app.put('/:id/name', async (c) => {
+    const auth = await resolveNonSwimmerUser(c, authConfig, db);
+    if (!auth.ok) {
+      return c.json({ error: auth.error }, auth.status);
+    }
+
+    const id = Number(c.req.param('id'));
+    if (!Number.isInteger(id) || id < 1) {
+      return c.json({ error: 'Invalid id' }, 400);
+    }
+
+    const existing = db
+      .prepare(`SELECT id FROM swimmer WHERE id = ?`)
+      .get(id) as { id: number } | undefined;
+    if (!existing) return c.json({ error: 'Not found' }, 404);
+
+    let body: unknown;
+    try {
+      body = await c.req.json();
+    } catch {
+      return c.json({ error: 'Invalid JSON body' }, 400);
+    }
+
+    if (typeof body !== 'object' || body === null) {
+      return c.json({ error: 'Invalid JSON body' }, 400);
+    }
+
+    const raw = body as Record<string, unknown>;
+    if (typeof raw.name !== 'string' || !raw.name.trim()) {
+      return c.json({ error: 'Invalid name' }, 400);
+    }
+    const name = raw.name.trim();
+
+    try {
+      db.prepare(`UPDATE swimmer SET name = ? WHERE id = ?`).run(name, id);
+      return c.json({ name });
+    } catch (e) {
+      return c.json({ error: e instanceof Error ? e.message : 'Update failed' }, 500);
+    }
+  });
+
   return app;
 }

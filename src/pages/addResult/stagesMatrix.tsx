@@ -63,13 +63,15 @@ const StagesMatrix: FC<{
         const computed = results[i] - next[i].slice(0, -1).reduce((prw, cur) => prw + cur.result, 0);
         if (next[i].at(-1).result !== computed) {
           isChanged = true;
+          col = i;
+          row = next[i].length - 1;
           next[i].at(-1).result = computed;
         }
       } else if (next[i].length > 0 && next[i].at(-1).result !== null) {
         isChanged = true;
-        next[i].at(-1).result = null;
         col = i;
         row = next[i].length - 1;
+        next[i].at(-1).result = null;
       }
     }
 

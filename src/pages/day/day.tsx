@@ -14,7 +14,7 @@ const Day = observer(() => {
   const results = useResults();
   const columns = useResultsColumns('day');
 
-  const rows = results.results.filter((r) => r.date.isValid() && r.date.format('YYYY-MM-DD') === day).sort((a, b) => a.date.valueOf() - b.date.valueOf());
+  const rows = results.results.filter((r) => r.date.isValid() && r.date.format('YYYY-MM-DD') === day).sort((a, b) => b.date.valueOf() - a.date.valueOf());
 
   const titleDate = dayjs(day);
 

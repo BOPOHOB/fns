@@ -82,6 +82,7 @@ const AddResult = () => {
   const onMatrixChange = useCallback((value: StagesRawInput[], repeat: number) => {
     // На саму матрицу мы тут не влияем
     setStages(value);
+    console.log(value, repeat);
     // Если сработало автозаполнение но пользователь продолжает что-то вводить то всё-равно меняем время, так что проверять значение в results не нужно
     if (value[repeat].find((v) => v.result === null) === undefined) {
       const next = [...resultRef.current];

@@ -18,7 +18,7 @@ const Swimmer = observer(() => {
     .filter(Boolean)
     .join(', ');
 
-  const rows = swimmer.results.sort((a, b) => a.date.valueOf() - b.date.valueOf());
+  const rows = swimmer.results.sort((a, b) => b.date.valueOf() - a.date.valueOf());
 
   return (
     <div className={cn.page}>

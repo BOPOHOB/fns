@@ -1,18 +1,23 @@
+@header-height: 45px;
+@header-border: 1px;
+@phone-nav-width: 991px;
+@burger-size: 24px;
+
 header.head {
   background: white;
-  border-bottom: 1px solid #f0f0f0;
-  height: 45px;
+  border-bottom: @header-border solid #f0f0f0;
+  height: @header-height;
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-right: 8px;
+  margin-left: 8px;
 
   nav {
     display: flex;
-    align-items: flex-start;
-    gap: 8px;
     align-items: center;
-    overflow: hidden;
+    gap: 8px;
+    overflow: visible;
 
     a {
       color: rgba(00, 0, 0, 0.65);
@@ -28,10 +33,59 @@ header.head {
       height: 45px;
     }
   }
+
+  .menu {  
+    @media (max-width: @phone-nav-width) {
+      display: none;
+    }
+  }
+  
+  .headerRight {
+    width: 24px;
+    overflow: visible;
+    &>* {
+      white-space: nowrap;
+      float:right;
+      .displayName {
+        @media (max-width: @phone-nav-width) {
+          display: none;
+        }
+      }
+    }
+  }
+
+  .burger {
+    display: none;
+    flex: 0 0 auto;
+    width: @burger-size;
+    height: @burger-size;
+    border: none;
+    background: transparent;
+    padding: 0;
+    font-size: (@burger-size / 3);
+    cursor: pointer;
+    z-index: 1;
+
+    /* Пакет рисует линии белым — на светлом хедере их не видно */
+    :global(.burger-lines),
+    :global(.burger-lines):before,
+    :global(.burger-lines):after {
+      background-color: rgba(0, 0, 0, 0.65) !important;
+    }
+
+    &:global(.open) :global(.burger-lines) {
+      background-color: transparent !important;
+    }
+
+    @media (max-width: @phone-nav-width) {
+      display: block;
+    }
+  }
 }
 
-.displayName {
-  @media (max-width: 640px) {
-    display: none;
-  }
+main {
+  width: 100vw;
+  position: relative;
+  height: calc(100vh - @header-height - @header-border);
+  overflow: auto;
 }

@@ -55,15 +55,17 @@ const FiltersBar = observer(() => {
         ]}
       />
 
-      <Typography.Text className={cn.ageLabel}>Возраст</Typography.Text>
-      <Slider
-        range
-        min={10}
-        max={90}
-        value={[filters.ageMin, filters.ageMax]}
-        onChange={([ageMin, ageMax]) => update({ ageMin, ageMax })}
-        className={cn.age}
-      />
+      <div className={cn.ageContainer}>
+        <Typography.Text>Возраст</Typography.Text>
+        <Slider
+          range
+          min={10}
+          max={90}
+          value={[filters.ageMin, filters.ageMax]}
+          onChange={([ageMin, ageMax]) => update({ ageMin, ageMax })}
+          className={cn.age}
+        />
+      </div>
       <Typography.Text type="secondary">
         {filters.ageMin}–{filters.ageMax}
       </Typography.Text>

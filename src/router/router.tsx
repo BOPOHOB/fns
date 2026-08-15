@@ -26,7 +26,7 @@ function Router() {
           <Routes>
             <Route element={<LoginOutline />}>
               <Route path="/auth/callback" element={<AuthCallback />} />
-              <Route path="/swimmers/add" element={<AddSwimmer />} />
+              <Route path="/add" element={<AddSwimmer />} />
               <Route path="/teams" element={<Teams />} />
               <Route path="/teams/add" element={<AddTeam />} />
               <Route path="/:segment" element={<SegmentOutline />}>

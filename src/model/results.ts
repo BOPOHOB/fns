@@ -64,6 +64,11 @@ class Results {
     return this.swimmers.map((s) => ({ label: s.name, value: s.id }));
   }
 
+  get days() {
+    const set = new Set(this.results.map(result => result.date.format("YYYY-MM-DD")));
+    return [...set.values()].sort();
+  }
+
   get swimmersMap() {
     return new Map(this.swimmers.map((swimmer) => [swimmer.id, swimmer]));
   } 

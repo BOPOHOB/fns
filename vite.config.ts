@@ -8,6 +8,10 @@ export default defineConfig({
     react(),
     babel({ presets: [reactCompilerPreset()] })
   ],
+  resolve: {
+    // @animated-burgers импортирует classnames, у нас уже clsx
+    alias: { classnames: 'clsx' },
+  },
   server: {
     port: 5173,
     proxy: {

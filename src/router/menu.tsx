@@ -70,6 +70,7 @@ const MenuImplementation: FC<{ mode?: MenuProps["mode"] }> = observer(({ mode })
       selectedKeys={selected}
       mode={mode}
       items={items}
+      disabledOverflow={horizontal}
     />
   );
 });

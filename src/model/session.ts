@@ -27,7 +27,7 @@ class Session {
   }
 
   get isTrainer() {
-    return this.#user.get()?.swimmerId;
+    return typeof this.#user.get()?.swimmerId === 'number';
   }
 
   get isLoading() {

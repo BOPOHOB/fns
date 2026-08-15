@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-HOST="${DEPLOY_HOST:-bopohob.ru}"
+HOST="${DEPLOY_HOST:-191.215.39.234}"
 USER="${DEPLOY_USER:-bopohob}"
 REMOTE="${USER}@${HOST}"
-REMOTE_DIR="${DEPLOY_DIR:-/var/www/feelandswim}"
+REMOTE_DIR="${DEPLOY_DIR:-/opt/feelandswim}"
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT"
@@ -74,9 +74,6 @@ ssh "$REMOTE" bash -s <<EOF
 set -euo pipefail
 export PATH="\$HOME/.deno/bin:\$PATH"
 command -v deno >/dev/null || { echo "Deno not found in PATH"; exit 1; }
-
-sudo cp ${REMOTE_DIR}/feelandswim.service /etc/systemd/system/feelandswim.service
-sudo cp ${REMOTE_DIR}/feelAndSwim.ru /etc/nginx/sites-enabled/feelAndSwim.ru
 
 sudo systemctl daemon-reload
 sudo systemctl stop fns.service 2>/dev/null || true

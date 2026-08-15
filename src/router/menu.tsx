@@ -6,14 +6,17 @@ import { useResults } from "../model/results";
 import { useLocation, useNavigate } from "react-router";
 import { formatRuDate } from "../utils/formatRuDate";
 import dayjs from "dayjs";
+import { c } from "../utils/c";
+import { useSession } from "../model/session";
 
 const useItems = (): NonNullable<MenuProps["items"]> => {
   const results = useResults();
   const days = results.days;
+  const session = useSession();
   return useMemo(
     () => [
       { key: "/", icon: <CrownOutlined />, label: "Таблица рекордов" },
-      { key: "/add", icon: <PlusOutlined />, label: "Добавить пловца" },
+      ...c(session.isTrainer, { key: "/add", icon: <PlusOutlined />, label: "Добавить пловца" }),
       { key: "/teams", icon: <UsergroupAddOutlined />, label: "Группы" },
       {
         key: "/workout",

@@ -7,6 +7,7 @@ import type { Swimmer } from '../../model/swimmer';
 import type { Dayjs } from 'dayjs';
 import { formatRuDate } from '../../utils/formatRuDate';
 import { ResultBadge, StagesBadge } from './stages';
+import { c } from '../../utils/c';
 
 const CONDITION_LABEL: Record<ResultCondition | 'open', string> = {
   competition: 'Соревнования',
@@ -22,8 +23,6 @@ const WATER_LABEL: Record<WaterType, string> = {
 };
 
 const renderStages = (_: never, result: Result) => <StagesBadge result={result} />
-
-const c = function<T>(condition: boolean, value: T): [] | [T] { return condition ? [value] : []; };
 
 function useResultsColumns(kind: 'swimmer' | 'day'): ColumnsType<Result> {
   return [

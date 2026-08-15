@@ -1,6 +1,6 @@
 server {
   server_name feelandswim.ru;
-  root /var/www/feelandswim/dist;
+  root /opt/feelandswim/dist;
   index index.html;
 
   # Vite build: hashed JS/CSS
@@ -23,20 +23,4 @@ server {
   location / {
     try_files $uri $uri/ /index.html;
   }
-
-  listen 443 ssl; # managed by Certbot
-  ssl_certificate /etc/letsencrypt/live/feelandswim.ru/fullchain.pem; # managed by Certbot
-  ssl_certificate_key /etc/letsencrypt/live/feelandswim.ru/privkey.pem; # managed by Certbot
-  include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
-  ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
-}
-
-server {
-  if ($host = feelandswim.ru) {
-    return 301 https://$host$request_uri;
-  } # managed by Certbot
-
-  server_name feelandswim.ru;
-  listen 80;
-  return 404; # managed by Certbot
 }

@@ -225,7 +225,13 @@ export function resultsRoutes(db: Db, authConfig: AuthConfig | null) {
     if (!row) return c.json({ error: 'Not found' }, 404);
 
     try {
-      return c.json(mapResult(row));
+      const swimmer = db
+        .prepare(`SELECT name FROM swimmer WHERE id = ?`)
+        .get(row.swimmer_id) as { name: string } | undefined;
+      return c.json({
+        ...mapResult(row),
+        swimmerName: swimmer?.name ?? "",
+      });
     } catch (e) {
       return c.json({ error: e instanceof Error ? e.message : 'Mapping error' }, 500);
     }

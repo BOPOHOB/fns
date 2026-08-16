@@ -1,4 +1,4 @@
-import type { WaterType } from '../types/result';
+import type { WaterType } from '../types/result.ts';
 
 export type DistanceCategory = '25m' | '50m' | 'open';
 

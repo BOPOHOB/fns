@@ -1,13 +1,9 @@
 import type { Dayjs } from 'dayjs';
+import { formatRuDateValue, MONTHS_GENITIVE } from '../shared/format';
 
 /** Родительный падеж: 14 августа 2026 */
-const MONTHS_GENITIVE = [
-  'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
-  'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря',
-] as const;
-
 function formatRuDate(date: Dayjs): string {
-  return `${date.date()} ${MONTHS_GENITIVE[date.month()]} ${date.year()}`;
+  return formatRuDateValue(date.toDate());
 }
 
 export { formatRuDate, MONTHS_GENITIVE };

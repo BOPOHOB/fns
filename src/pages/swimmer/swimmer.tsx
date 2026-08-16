@@ -1,16 +1,17 @@
-import { Button, DatePicker, Input, Space, Typography } from 'antd';
+import { Button, DatePicker, Space, Typography } from 'antd';
 import { Link } from 'react-router';
 import { observer } from 'mobx-react';
 import dayjs, { type Dayjs } from 'dayjs';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useSwimmer } from '../../router/swimmerOutline';
 import { useResults } from '../../model/results';
 import { useSession } from '../../model/session';
 import { PlusOutlined } from '@ant-design/icons';
-import { useResultsColumns } from '../results/useResultsColumns';
+import { useResultsColumns, resultsTableScrollX } from '../results/useResultsColumns';
+import { AsyncInput } from '../../components/asyncInput';
+import { CommonTable } from '../../components/commonTable';
 
 import cn from './swimmer.module.less';
-import { CommonTable } from '../../components/commonTable';
 
 const NAME_SAVE_DEBOUNCE_MS = 2000;
 
@@ -20,23 +21,6 @@ const Swimmer = observer(() => {
   const session = useSession();
   const columns = useResultsColumns('swimmer');
   const [savingBirthDate, setSavingBirthDate] = useState(false);
-  const [nameDraft, setNameDraft] = useState(swimmer.name);
-
-  useEffect(() => {
-    setNameDraft(swimmer.name);
-  }, [swimmer.id, swimmer.name]);
-
-  useEffect(() => {
-    if (!session.isTrainer) return;
-    const trimmed = nameDraft.trim();
-    if (!trimmed || trimmed === swimmer.name) return;
-
-    const timer = window.setTimeout(() => {
-      void results.setSwimmerName(swimmer.id, trimmed);
-    }, NAME_SAVE_DEBOUNCE_MS);
-
-    return () => window.clearTimeout(timer);
-  }, [nameDraft, results, session.isTrainer, swimmer.id, swimmer.name]);
 
   const teamNames = swimmer.teamIds
     .map((id) => results.teams.find((t) => t.id === id)?.name)
@@ -72,11 +56,12 @@ const Swimmer = observer(() => {
         <Link to="add">Добавить результат</Link>
       </Button>
       {session.isTrainer ? (
-        <Input
+        <AsyncInput
           className={cn.name}
-          value={nameDraft}
-          onChange={(e) => setNameDraft(e.target.value)}
+          value={swimmer.name}
+          debounceMs={NAME_SAVE_DEBOUNCE_MS}
           placeholder="Имя"
+          onChange={(name) => results.setSwimmerName(swimmer.id, name)}
         />
       ) : (
         <Typography.Title level={3}>{swimmer.name}</Typography.Title>
@@ -100,7 +85,7 @@ const Swimmer = observer(() => {
           )}
         </Space>
       </Typography.Paragraph>
-      <CommonTable columns={columns} dataSource={rows} />
+      <CommonTable columns={columns} dataSource={rows} scroll={{ x: resultsTableScrollX('swimmer') }} />
     </div>
   );
 });

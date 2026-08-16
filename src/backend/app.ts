@@ -10,6 +10,7 @@ import { teamsRoutes } from './routes/teams.ts';
 import { resultsRoutes } from './routes/results.ts';
 import { seriesRoutes } from './routes/series.ts';
 import { meRoutes } from './routes/me.ts';
+import { ogRoutes } from './og/routes.ts';
 
 type SsrModule = {
   renderToHtml: (request: Request, template: string) => Promise<Response>;
@@ -51,6 +52,7 @@ export function createApp(db: Db, options: CreateAppOptions = {}) {
   app.route('/api/teams', teamsRoutes(db, authConfig));
   app.route('/api/results', resultsRoutes(db, authConfig));
   app.route('/api/series', seriesRoutes(db, authConfig));
+  app.route('/api/og', ogRoutes(db));
 
   const { clientDir, serverEntry } = options;
 

@@ -9,7 +9,24 @@ import { SegmentOutline } from "./segmentOutline";
 import { SegmentAdd, SegmentIndex } from "./segmentPages";
 import { ResultOutline } from "./resultOutline";
 import { ResultPage } from "../pages/result/result";
-import type { RouteMeta } from "./meta";
+import type { MetaContext, RouteMeta } from "./meta";
+import { resultOgImageUrl, resultPageUrl } from "../shared/publicOrigin.ts";
+import { formatResultMeta } from "../shared/resultMeta.ts";
+import type { Result } from "../types/result";
+
+type ResultLoaderData = Result & { swimmerName?: string };
+
+async function loadResultMeta(
+  request: Request,
+  resultId: string | undefined,
+): Promise<ResultLoaderData | null> {
+  const id = Number(resultId);
+  if (!Number.isInteger(id) || id < 1) return null;
+  const origin = new URL(request.url).origin;
+  const res = await fetch(`${origin}/api/results/${id}`);
+  if (!res.ok) return null;
+  return (await res.json()) as ResultLoaderData;
+}
 
 const routes: RouteObject[] = [
   {
@@ -79,8 +96,36 @@ const routes: RouteObject[] = [
             id: "result",
             path: ":resultId",
             Component: ResultOutline,
+            loader: async ({ params, request }) =>
+              loadResultMeta(request, params.resultId),
             handle: {
-              meta: { title: "Результат — FeelAndSwim" } satisfies RouteMeta,
+              meta: ({ data, params }: MetaContext): RouteMeta => {
+                const resultId = params.resultId;
+                const segment = params.segment;
+                const base: RouteMeta = {
+                  title: "Результат — FeelAndSwim",
+                  description: "Карточка результата пловца",
+                };
+                if (!resultId || !segment) return base;
+
+                const result = data as ResultLoaderData | null;
+                const fromResult = result
+                  ? formatResultMeta({
+                      distance: result.distance,
+                      result: result.result,
+                      date: result.date,
+                      swimmerName: result.swimmerName ?? "",
+                      stages: result.stages,
+                    })
+                  : null;
+
+                return {
+                  title: fromResult?.title ?? base.title,
+                  description: fromResult?.description ?? base.description,
+                  ogImage: resultOgImageUrl(resultId),
+                  ogUrl: resultPageUrl(segment, resultId),
+                };
+              },
             },
             children: [
               {

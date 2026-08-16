@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import { useDay } from '../../router/dayOutline';
 import { useResults } from '../../model/results';
 import { formatRuDate } from '../../utils/formatRuDate';
-import { useResultsColumns } from '../results/useResultsColumns';
+import { useResultsColumns, resultsTableScrollX } from '../results/useResultsColumns';
 
 import cn from './day.module.less';
 import { CommonTable } from '../../components/commonTable';
@@ -27,7 +27,7 @@ const Day = observer(() => {
       <Typography.Title level={3}>
         Результаты за {titleDate.isValid() ? formatRuDate(titleDate) : day}
       </Typography.Title>
-      <CommonTable columns={columns} dataSource={rows} />
+      <CommonTable columns={columns} dataSource={rows} scroll={{ x: resultsTableScrollX('day') }} />
     </div>
   );
 });

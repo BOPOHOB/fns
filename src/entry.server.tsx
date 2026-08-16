@@ -37,7 +37,8 @@ async function renderToHtml(
     metaFromMatches(
       context.matches.map((match) => ({
         handle: match.route.handle,
-        data: match.loaderData,
+        data: context.loaderData[match.route.id],
+        params: match.params,
       })),
     ),
   );

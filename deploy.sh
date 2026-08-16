@@ -35,7 +35,15 @@ rsync -az --delete src/backend/ "${REMOTE}:${REMOTE_DIR}/src/backend/"
 rsync -az --delete src/types/ "${REMOTE}:${REMOTE_DIR}/src/types/"
 rsync -az --delete src/shared/ "${REMOTE}:${REMOTE_DIR}/src/shared/"
 rsync -az --delete src/sql/ "${REMOTE}:${REMOTE_DIR}/src/sql/"
+# Явно ещё раз OG-модули (Deno читает их с диска; без этого легко остаться на старой вёрстке)
+rsync -az src/shared/stagesLayout.ts "${REMOTE}:${REMOTE_DIR}/src/shared/stagesLayout.ts"
+rsync -az --delete src/backend/og/ "${REMOTE}:${REMOTE_DIR}/src/backend/og/"
 scp deno.json deno.lock feelandswim.service feelAndSwim.ru "${REMOTE}:${REMOTE_DIR}/"
+
+echo "==> Verifying OG layout sources on remote…"
+ssh "$REMOTE" "grep -q 'STAGE_CHUNK_LENGTH' ${REMOTE_DIR}/src/shared/stagesLayout.ts \
+  && test -f ${REMOTE_DIR}/src/backend/og/routes.ts \
+  && test -f ${REMOTE_DIR}/src/backend/og/resultCard.ts"
 
 # Production env on the server (do not commit)
 ssh "$REMOTE" "cat > ${REMOTE_DIR}/.env" <<EOF
@@ -46,6 +54,7 @@ OAUTH_REDIRECT_URI=https://feelandswim.ru/auth/callback
 COOKIE_SECURE=true
 HOST=127.0.0.1
 PORT=8787
+DENO_ENV=production
 DB_PATH=${REMOTE_DIR}/data.db
 PROJECT_ROOT=${REMOTE_DIR}
 EOF
@@ -70,11 +79,20 @@ EOF
   fi
 fi
 
-echo "==> Installing service, switching from fns, reloading nginx…"
+echo "==> Installing service, clearing OG cache, reloading nginx…"
 ssh "$REMOTE" bash -s <<EOF
 set -euo pipefail
 export PATH="\$HOME/.deno/bin:\$PATH"
 command -v deno >/dev/null || { echo "Deno not found in PATH"; exit 1; }
+
+cd ${REMOTE_DIR}
+deno install
+
+# Unit должен указывать на файл в ${REMOTE_DIR} (его обновляет scp)
+sudo ln -sfn ${REMOTE_DIR}/feelandswim.service /etc/systemd/system/feelandswim.service
+
+# Старые PNG иначе могут отдаваться до смены fingerprint
+rm -rf ${REMOTE_DIR}/cache/og
 
 sudo systemctl daemon-reload
 sudo systemctl stop fns.service 2>/dev/null || true
@@ -88,6 +106,7 @@ sleep 1
 curl -fsS http://127.0.0.1:8787/api/health
 echo
 curl -fsS -o /dev/null -w "SSR / -> %{http_code}\n" http://127.0.0.1:8787/
+curl -fsS -o /dev/null -w "OG sample -> %{http_code} %{content_type}\n" http://127.0.0.1:8787/api/og/result/1.png || true
 systemctl is-active feelandswim.service
 EOF
 

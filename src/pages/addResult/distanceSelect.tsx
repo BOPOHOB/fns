@@ -1,26 +1,9 @@
 import { Select } from "antd";
-import { plural } from "../../utils/plural";
 import type { FC } from "react";
 import { ALLOWED_DISTANCES } from "../../shared/distances";
+import { distanceName } from "../../shared/format";
 
-const MILE = 1852;
 const DISTANCES = Array.from(ALLOWED_DISTANCES.values()).sort((a, b) => a - b);
-
-const distanceName = (distance: number, short: boolean = false) => {
-  if (distance < 1000) {
-    return `${distance}${short ? 'м': plural(distance, [' метр', ' метров', ' метра'])}`
-  }
-  if (distance === 1000) {
-    return "Километр";
-  }
-  const miles = distance / MILE;
-  if (miles === Math.floor(miles)) {
-    return miles === 1 ? 'Миля' : `${miles} ${plural(distance, ['миля', 'миль', 'мили'])}`
-  }
-  const km = distance / 1000;
-  return `${km}${short ? 'км': plural(km, [' километр', ' километров', ' километра'])}`
-}
-
 const OPTIONS = DISTANCES.map((value) => ({ value, label: distanceName(value) }));
 
 const DistanceSelect: FC<{ className?: string; value: number; onChange: ((v: number) =>void) }> = ({className, value, onChange}) => (

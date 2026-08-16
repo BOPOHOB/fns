@@ -1,21 +1,24 @@
 import { Table as AntdTable, type TableProps } from "antd";
 
-const SCROLL = { x: "max-content" } as const;
+const DEFAULT_SCROLL = { x: "max-content" } as const;
 
 const LOCALE = { emptyText: "Нет результатов" };
 
 type CommonTableProps<RecordType> = Omit<
   TableProps<RecordType>,
-  "size" | "pagination" | "scroll"
+  "size" | "pagination"
 >;
 
-function CommonTable<RecordType extends object>(props: CommonTableProps<RecordType>) {
+function CommonTable<RecordType extends object>({
+  scroll = DEFAULT_SCROLL,
+  ...props
+}: CommonTableProps<RecordType>) {
   return (
     <AntdTable<RecordType>
       locale={LOCALE}
       size="small"
       pagination={false}
-      scroll={SCROLL}
+      scroll={scroll}
       {...props}
     />
   );

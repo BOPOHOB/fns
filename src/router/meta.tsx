@@ -1,4 +1,5 @@
-import { useMemo, type ReactNode } from "react";
+import type { ReactNode } from "react";
+import { useMemo } from "react";
 import { useMatches } from "react-router";
 
 type RouteMeta = {
@@ -8,35 +9,59 @@ type RouteMeta = {
   ogUrl?: string;
 };
 
+type MetaContext = {
+  data: unknown;
+  params: Record<string, string | undefined>;
+};
+
 type MetaHandle = {
-  meta?: RouteMeta | ((data: unknown) => RouteMeta);
+  meta?: RouteMeta | ((ctx: MetaContext) => RouteMeta);
 };
 
 function resolveMeta(
   handle: unknown,
   data: unknown,
+  params: Record<string, string | undefined>,
 ): RouteMeta {
   if (!handle || typeof handle !== "object") return {};
   const meta = (handle as MetaHandle).meta;
   if (!meta) return {};
-  return typeof meta === "function" ? meta(data) : meta;
+  return typeof meta === "function" ? meta({ data, params }) : meta;
+}
+
+type MatchLike = {
+  handle?: unknown;
+  data?: unknown;
+  params?: Record<string, string | undefined>;
+};
+
+function mergeMeta(matches: ReadonlyArray<MatchLike>): RouteMeta {
+  const merged: RouteMeta = {
+    title: "FeelAndSwim",
+    description: "Результаты и тренировки по плаванию",
+  };
+  for (const match of matches) {
+    Object.assign(
+      merged,
+      resolveMeta(match.handle, match.data, match.params ?? {}),
+    );
+  }
+  return merged;
 }
 
 function useRouteMeta(): RouteMeta {
   const matches = useMatches();
-  return useMemo(() => {
-    const merged: RouteMeta = {
-      title: "FeelAndSwim",
-      description: "Результаты и тренировки по плаванию",
-    };
-    for (const match of matches) {
-      Object.assign(
-        merged,
-        resolveMeta(match.handle, (match as { data?: unknown }).data),
-      );
-    }
-    return merged;
-  }, [matches]);
+  return useMemo(
+    () =>
+      mergeMeta(
+        matches.map((match) => ({
+          handle: match.handle,
+          data: match.loaderData,
+          params: match.params,
+        })),
+      ),
+    [matches],
+  );
 }
 
 /** Meta tags for SSR document head (and client <head> via portal-less render in layout). */
@@ -65,17 +90,8 @@ const DocumentMeta = ({ children }: { children?: ReactNode }) => {
   );
 };
 
-function metaFromMatches(
-  matches: ReadonlyArray<{ handle?: unknown; data?: unknown }>,
-): RouteMeta {
-  const merged: RouteMeta = {
-    title: "FeelAndSwim",
-    description: "Результаты и тренировки по плаванию",
-  };
-  for (const match of matches) {
-    Object.assign(merged, resolveMeta(match.handle, match.data));
-  }
-  return merged;
+function metaFromMatches(matches: ReadonlyArray<MatchLike>): RouteMeta {
+  return mergeMeta(matches);
 }
 
 function renderHeadTags(meta: RouteMeta): string {
@@ -115,4 +131,5 @@ export {
   renderHeadTags,
   useRouteMeta,
   type RouteMeta,
+  type MetaContext,
 };

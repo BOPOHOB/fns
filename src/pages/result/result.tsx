@@ -2,7 +2,7 @@ import { Button, Typography } from "antd";
 import { Link } from "react-router";
 import { observer } from "mobx-react";
 import { useResult } from "../../router/resultOutline";
-import { useResultsColumns } from "../results/useResultsColumns";
+import { useResultsColumns, resultsTableScrollX } from "../results/useResultsColumns";
 import { CommonTable } from "../../components/commonTable";
 import { formatRuDate } from "../../utils/formatRuDate";
 import { stringifySeconds } from "../../utils/stringifySeconds";
@@ -36,7 +36,12 @@ const ResultPage = observer(() => {
       </Button>
       <Typography.Title level={3}>{title}</Typography.Title>
       <Typography.Paragraph type="secondary">{subtitle}</Typography.Paragraph>
-      <CommonTable columns={columns} dataSource={rows} rowKey="id" />
+      <CommonTable
+        columns={columns}
+        dataSource={rows}
+        rowKey="id"
+        scroll={{ x: resultsTableScrollX("swimmer") }}
+      />
     </div>
   );
 });

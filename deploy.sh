@@ -23,8 +23,8 @@ set +a
 : "${YANDEX_CLIENT_ID:?YANDEX_CLIENT_ID missing in .env}"
 : "${YANDEX_CLIENT_SECRET:?YANDEX_CLIENT_SECRET missing in .env}"
 
-echo "==> Building frontend…"
-npx vite build
+echo "==> Building frontend (client + SSR)…"
+npm run build
 
 echo "==> Preparing remote directories…"
 ssh "$REMOTE" "mkdir -p ${REMOTE_DIR}/dist ${REMOTE_DIR}/src"
@@ -47,6 +47,7 @@ COOKIE_SECURE=true
 HOST=127.0.0.1
 PORT=8787
 DB_PATH=${REMOTE_DIR}/data.db
+PROJECT_ROOT=${REMOTE_DIR}
 EOF
 ssh "$REMOTE" "chmod 600 ${REMOTE_DIR}/.env"
 
@@ -86,6 +87,7 @@ sudo systemctl reload nginx
 sleep 1
 curl -fsS http://127.0.0.1:8787/api/health
 echo
+curl -fsS -o /dev/null -w "SSR / -> %{http_code}\n" http://127.0.0.1:8787/
 systemctl is-active feelandswim.service
 EOF
 

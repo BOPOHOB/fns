@@ -4,11 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "dev": "bash -c 'trap \"kill 0\" EXIT; deno task backend:dev & exec vite'",
     "start": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build && vite build --ssr src/entry.server.tsx",
+    "typecheck": "tsc -b",
+    "build:client": "vite build",
+    "build:server": "vite build --ssr src/entry.server.tsx",
     "lint": "oxlint",
     "preview": "vite preview",
     "deploy": "bash deploy.sh",
+    "backend": "deno task backend",
     "agent": "agent --resume=6ace765c-5efd-409e-954f-c211ddcb2177"
   },
   "dependencies": {

@@ -1,5 +1,5 @@
 [Unit]
-Description=feelAndSwim API (Deno)
+Description=feelAndSwim (Deno API + SSR)
 After=network.target
 
 [Service]
@@ -11,6 +11,7 @@ Restart=on-failure
 RestartSec=3
 Environment=HOST=127.0.0.1
 Environment=PORT=8787
+Environment=PROJECT_ROOT=/opt/feelandswim
 Environment=DB_PATH=/opt/feelandswim/data.db
 Environment=FRONTEND_ORIGIN=https://feelandswim.ru
 Environment=OAUTH_REDIRECT_URI=https://feelandswim.ru/auth/callback

@@ -38,6 +38,21 @@ class Result {
     return this.data.swimmerId;
   }
 
+  get seriesId() {
+    return this.data.seriesId;
+  }
+
+  /** Серия, в которую входит результат; `undefined` если одиночный. */
+  get series() {
+    const id = this.data.seriesId;
+    if (id == null) return undefined;
+    return this.#model.deref()?.series.find((s) => s.id === id);
+  }
+
+  get notes() {
+    return this.data.notes;
+  }
+
   get water() {
     return this.data.water;
   }

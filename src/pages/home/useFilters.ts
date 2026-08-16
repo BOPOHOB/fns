@@ -50,6 +50,7 @@ function isDistanceCategory(v: string): v is DistanceCategory {
 }
 
 function readStorage(): Partial<FilterState> | null {
+  if (typeof window === 'undefined') return null;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
@@ -60,6 +61,7 @@ function readStorage(): Partial<FilterState> | null {
 }
 
 function writeStorage(state: FilterState) {
+  if (typeof window === 'undefined') return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
@@ -121,7 +123,9 @@ function useFilters() {
   );
 
   const clearFilters = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(STORAGE_KEY);
+    }
     setSearchParams({}, { replace: true });
   }, [setSearchParams]);
 

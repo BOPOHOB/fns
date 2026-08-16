@@ -10,19 +10,9 @@ import logo from './logo.jpg';
 import { LoginOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { Menu } from "./menu";
-import BurgerRotate from '@animated-burgers/burger-rotate';
-import '@animated-burgers/burger-rotate/dist/styles.css';
+import { ClientBurger } from "./clientBurger";
 import { useMediaQuery } from "../utils/useMediaQuery";
-
-function resolveCjsDefault<T>(mod: T | { default: T | { default: T } }): T {
-  let current: unknown = mod;
-  while (current && typeof current === 'object' && 'default' in current) {
-    current = (current as { default: unknown }).default;
-  }
-  return current as T;
-}
-
-const Burger = resolveCjsDefault(BurgerRotate);
+import { DocumentMeta } from "./meta";
 
 /** Keep in sync with @phone-nav-width in loginOutline.module.less */
 const PHONE_NAV_QUERY = "(max-width: 991px)";
@@ -43,9 +33,10 @@ const LoginOutline = observer(() => {
 
   return (
     <>
+      <DocumentMeta />
       <header className={cn.head}>
         {isPhoneNav && (
-          <Burger
+          <ClientBurger
             Component="button"
             aria-label="Меню"
             className={cn.burger}

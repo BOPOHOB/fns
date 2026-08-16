@@ -1,11 +1,25 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@hono/hono@^4.11.4": "4.12.32"
+    "jsr:@hono/hono@^4.11.4": "4.13.2",
+    "jsr:@std/internal@^1.0.14": "1.0.14",
+    "jsr:@std/path@*": "1.1.6"
   },
   "jsr": {
     "@hono/hono@4.12.32": {
       "integrity": "e1274e968ee724176d7e35946c184d3cb8508f05e3f8ae6cee157c4f29ef148d"
+    },
+    "@hono/hono@4.13.2": {
+      "integrity": "715d8cc1b6b5d6b9e6a7519059778d775b2d79fffdc026ac0ccdd9971e75809c"
+    },
+    "@std/internal@1.0.14": {
+      "integrity": "291516b3d4c35024d6ffbc0a9df5bf4c64116e05b50012cf846710152d2ffdf7"
+    },
+    "@std/path@1.1.6": {
+      "integrity": "c68485c2a4dfbb5ae3cc74fae4e8c4e5d874cf8a8ed12927917235c758b46cbe",
+      "dependencies": [
+        "jsr:@std/internal"
+      ]
     }
   },
   "workspace": {
@@ -14,6 +28,7 @@
     ],
     "packageJson": {
       "dependencies": [
+        "npm:@animated-burgers/burger-rotate@^1.1.2",
         "npm:@ant-design/icons@^6.3.2",
         "npm:@babel/core@^7.29.7",
         "npm:@rolldown/plugin-babel@~0.2.3",

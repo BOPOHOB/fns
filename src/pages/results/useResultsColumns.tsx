@@ -54,6 +54,10 @@ function useResultsColumns(kind: 'swimmer' | 'day'): ColumnsType<Result> {
       dataIndex: 'condition' as const,
       render: (v: ResultCondition | 'open') => CONDITION_LABEL[v],
     },
+    {
+      title: 'Заметки',
+      dataIndex: 'notes' as const,
+    }
   ];
 }
 

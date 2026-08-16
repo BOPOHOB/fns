@@ -1,16 +1,31 @@
-import { type DependencyList, useEffect, useState } from 'react';
+import { useState, useEffect, type DependencyList } from "react";
 
 type Disposable = object & {
   destructor?: () => void;
 };
 
-function useModel<T extends Disposable>(creator: () => T, deps: DependencyList = []): T | null {
-  const [model, setModel] = useState<T | null>(null);
+/** Creates a model synchronously (SSR-safe). Recreates when `deps` change. */
+function useModel<T extends Disposable>(
+  creator: () => T,
+  deps: DependencyList = [],
+): T {
+  const [model, setModel] = useState(creator);
+
   useEffect(() => {
+    if (deps.length === 0) {
+      return () => {
+        model.destructor?.();
+      };
+    }
+
     const instance = creator();
     setModel(instance);
-    return instance.destructor;
+    return () => {
+      instance.destructor?.();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- caller-controlled deps
   }, deps);
+
   return model;
 }
 

@@ -14,7 +14,11 @@ class Session {
   #authError = observable.box<string | null>(null);
 
   constructor() {
-    void this.loadMe();
+    if (import.meta.env.SSR) {
+      this.#user.set(null);
+    } else {
+      void this.loadMe();
+    }
 
     makeObservable(this, {
       loadMe: action,

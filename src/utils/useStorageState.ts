@@ -50,18 +50,24 @@ function decode(value: unknown): unknown {
   return value;
 }
 
+function canUseStorage() {
+  return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+}
+
 function useStorageState<S>(
   initialValue: S | (() => S),
   storageKey: string,
 ): [S, Dispatch<SetStateAction<S>>] {
   const [value, setValue] = useState<S>(() => {
-    try {
-      const stored = localStorage.getItem(storageKey);
-      if (stored !== null) {
-        return decode(JSON.parse(stored)) as S;
+    if (canUseStorage()) {
+      try {
+        const stored = localStorage.getItem(storageKey);
+        if (stored !== null) {
+          return decode(JSON.parse(stored)) as S;
+        }
+      } catch {
+        // битый JSON — падаем на initialValue
       }
-    } catch {
-      // битый JSON — падаем на initialValue
     }
 
     return typeof initialValue === 'function'
@@ -70,6 +76,7 @@ function useStorageState<S>(
   });
 
   useEffect(() => {
+    if (!canUseStorage()) return;
     localStorage.setItem(storageKey, JSON.stringify(encode(value)));
   }, [storageKey, value]);
 

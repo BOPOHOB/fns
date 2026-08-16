@@ -16,18 +16,20 @@ class Results {
   isLoading = true;
 
   constructor() {
-    getResults().then(({
-      results,
-      swimmers,
-      series,
-      teams,
-    }) => runInAction(() => transaction(() => {
-      this.isLoading = false;
-      this.results.replace(results.map((json) => new Result(json, this)));
-      this.swimmers.replace(swimmers.map((json) => new Swimmer(json, this)));
-      this.series.replace(series.map((json) => new ResultSeries(json, this)));
-      this.teams.replace(teams.map((json) => new Team(json, this)));
-    })));
+    if (!import.meta.env.SSR) {
+      getResults().then(({
+        results,
+        swimmers,
+        series,
+        teams,
+      }) => runInAction(() => transaction(() => {
+        this.isLoading = false;
+        this.results.replace(results.map((json) => new Result(json, this)));
+        this.swimmers.replace(swimmers.map((json) => new Swimmer(json, this)));
+        this.series.replace(series.map((json) => new ResultSeries(json, this)));
+        this.teams.replace(teams.map((json) => new Team(json, this)));
+      })));
+    }
 
     makeObservable(this, {
       isLoading: observable,

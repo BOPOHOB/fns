@@ -33,9 +33,11 @@ const StagesBadge: FC<{ result: Result }> = ({ result }) => {
       <div key={pos} style={style} className={cn.badge}>
         <div>{span === 1 ? String(pos) : `${pos - stage.distance} - ${pos}`}</div>
         <div>
-          {stringifySeconds(
-            span !== 1 ? (stage.result / stage.distance) * 100 : stage.result,
-          )}
+          {
+            span !== 1 
+              ? `${stringifySeconds(stage.result)} (${stringifySeconds((stage.result / stage.distance) * 100)})`
+              : stringifySeconds(stage.result)
+          }
         </div>
       </div>,
     );

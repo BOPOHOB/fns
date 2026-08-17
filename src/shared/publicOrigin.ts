@@ -14,8 +14,12 @@ function resultOgImageUrl(resultId: number | string): string {
   return `${publicOrigin()}/api/og/result/${resultId}.png`;
 }
 
-function resultPageUrl(segment: string, resultId: number | string): string {
-  return `${publicOrigin()}/${segment}/${resultId}`;
+function resultPagePath(resultId: number | string): string {
+  return `/results/${resultId}`;
 }
 
-export { publicOrigin, resultOgImageUrl, resultPageUrl };
+function resultPageUrl(resultId: number | string): string {
+  return `${publicOrigin()}${resultPagePath(resultId)}`;
+}
+
+export { publicOrigin, resultOgImageUrl, resultPagePath, resultPageUrl };

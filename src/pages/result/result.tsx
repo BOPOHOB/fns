@@ -14,28 +14,28 @@ const ResultPage = observer(() => {
   const columns = useResultsColumns("swimmer");
   const series = result.series;
   const rows = series ? series.results : [result];
+  const swimmer = result.swimmer;
 
   const title = series
     ? `Серия · ${result.distanceName}`
     : `${result.distanceName} · ${stringifySeconds(result.result)}`;
 
-  const subtitle = [
-    result.swimmer?.name,
-    formatRuDate(result.date),
-    series
-      ? `${series.repetitions} повт.${series.regime != null ? ` · интервал ${stringifySeconds(series.regime)}` : ""}`
-      : null,
-  ]
-    .filter(Boolean)
-    .join(" · ");
-
   return (
     <div className={cn.page}>
       <Button type="link" className={cn.back}>
-        <Link to={`/${result.swimmerId}`}>← К пловцу</Link>
+        <Link to="/">← Назад</Link>
       </Button>
       <Typography.Title level={3}>{title}</Typography.Title>
-      <Typography.Paragraph type="secondary">{subtitle}</Typography.Paragraph>
+      <Typography.Paragraph type="secondary">
+        {swimmer ? (
+          <Link to={`/${result.swimmerId}`}>{swimmer.name}</Link>
+        ) : null}
+        {swimmer ? " · " : null}
+        {formatRuDate(result.date)}
+        {series
+          ? ` · ${series.repetitions} повт.${series.regime != null ? ` · интервал ${stringifySeconds(series.regime)}` : ""}`
+          : null}
+      </Typography.Paragraph>
       <CommonTable
         columns={columns}
         dataSource={rows}

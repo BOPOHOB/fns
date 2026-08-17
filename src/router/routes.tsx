@@ -84,6 +84,48 @@ const routes: RouteObject[] = [
         },
       },
       {
+        id: "result",
+        path: "results/:resultId",
+        Component: ResultOutline,
+        loader: async ({ params, request }) =>
+          loadResultMeta(request, params.resultId),
+        handle: {
+          meta: ({ data, params }: MetaContext): RouteMeta => {
+            const resultId = params.resultId;
+            const base: RouteMeta = {
+              title: "Результат — FeelAndSwim",
+              description: "Карточка результата пловца",
+            };
+            if (!resultId) return base;
+
+            const result = data as ResultLoaderData | null;
+            const fromResult = result
+              ? formatResultMeta({
+                  distance: result.distance,
+                  result: result.result,
+                  date: result.date,
+                  swimmerName: result.swimmerName ?? "",
+                  stages: result.stages,
+                })
+              : null;
+
+            return {
+              title: fromResult?.title ?? base.title,
+              description: fromResult?.description ?? base.description,
+              ogImage: resultOgImageUrl(resultId),
+              ogUrl: resultPageUrl(resultId),
+            };
+          },
+        },
+        children: [
+          {
+            id: "result-index",
+            index: true,
+            Component: ResultPage,
+          },
+        ],
+      },
+      {
         id: "segment",
         path: ":segment",
         Component: SegmentOutline,
@@ -103,49 +145,6 @@ const routes: RouteObject[] = [
             handle: {
               meta: { title: "Добавить результат — FeelAndSwim" } satisfies RouteMeta,
             },
-          },
-          {
-            id: "result",
-            path: ":resultId",
-            Component: ResultOutline,
-            loader: async ({ params, request }) =>
-              loadResultMeta(request, params.resultId),
-            handle: {
-              meta: ({ data, params }: MetaContext): RouteMeta => {
-                const resultId = params.resultId;
-                const segment = params.segment;
-                const base: RouteMeta = {
-                  title: "Результат — FeelAndSwim",
-                  description: "Карточка результата пловца",
-                };
-                if (!resultId || !segment) return base;
-
-                const result = data as ResultLoaderData | null;
-                const fromResult = result
-                  ? formatResultMeta({
-                      distance: result.distance,
-                      result: result.result,
-                      date: result.date,
-                      swimmerName: result.swimmerName ?? "",
-                      stages: result.stages,
-                    })
-                  : null;
-
-                return {
-                  title: fromResult?.title ?? base.title,
-                  description: fromResult?.description ?? base.description,
-                  ogImage: resultOgImageUrl(resultId),
-                  ogUrl: resultPageUrl(segment, resultId),
-                };
-              },
-            },
-            children: [
-              {
-                id: "result-index",
-                index: true,
-                Component: ResultPage,
-              },
-            ],
           },
         ],
       },

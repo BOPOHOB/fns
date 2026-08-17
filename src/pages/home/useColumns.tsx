@@ -1,7 +1,7 @@
 import type { ColumnsType } from "antd/es/table";
 import { Button, Tooltip } from "antd";
 import { useResults } from "../../model/results";
-import { useMemo, type ReactNode } from "react";
+import { useMemo } from "react";
 import { Link, useNavigate } from "react-router";
 import type { Swimmer } from "../../model/swimmer";
 import { useSession } from "../../model/session";
@@ -9,6 +9,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { useFilters } from "./useFilters";
 import { distancesForCategories } from "../../shared/distances";
 import { distanceName } from "../addResult/distanceSelect";
+import { resultPagePath } from "../../shared/publicOrigin";
 
 import cn from './columns.module.less';
 import type { Result } from "../../model/result";
@@ -28,28 +29,30 @@ const conditionTooltip = (condition: ResultCondition | 'open'): string | undefin
   return condition !== 'workout' ? `результат зафиксирован на ${CONDITION_TOOL_TIP[condition]}` : undefined;
 }
 
-function renderResult(entry: Result, markers: ReactNode[]) {
+function renderResult(entry: Result) {
   const time = stringifySeconds(entry.result);
   const condition = entry.condition;
   const timeClassName = cn[condition];
   return (
-    <>
-      <Tooltip
-        title={
-          [
-            entry.date
-              ? `Установлен ${formatRuDate(entry.date)} года`
-              : 'Дата фиксации результата не указана'
-            ,
-            conditionTooltip(condition),
-            entry.fifty && 'результат показан в 50м бассейне'
-          ].filter(Boolean).join(', ')
-        }
+    <Tooltip
+      title={
+        [
+          entry.date
+            ? `Установлен ${formatRuDate(entry.date)} года`
+            : 'Дата фиксации результата не указана'
+          ,
+          conditionTooltip(condition),
+          entry.fifty && 'результат показан в 50м бассейне'
+        ].filter(Boolean).join(', ')
+      }
+    >
+      <Link
+        to={resultPagePath(entry.id)}
+        className={clsx(cn.timeLink, timeClassName, entry.fifty && cn.fifty)}
       >
-        <span className={clsx(timeClassName, entry.fifty && cn.fifty)}>{time}</span>
-      </Tooltip>
-      {markers}
-    </>
+        {time}
+      </Link>
+    </Tooltip>
   );
 }
 
@@ -97,8 +100,8 @@ const useColumns = (): ColumnsType<Swimmer["row"]> => {
       dataIndex: distance,
       key: distance,
       render: (cellResults: Result[] | undefined) => {
-        return cellResults?.map((e, i) => (
-          <div key={e.id}>{renderResult(e, [])}</div>
+        return cellResults?.map((e) => (
+          <div key={e.id}>{renderResult(e)}</div>
         )) ?? '—';
       }
     }))

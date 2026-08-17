@@ -1,6 +1,8 @@
 import { type FC, type ReactNode } from "react";
+import { Link } from "react-router";
 import type { Result } from "../../model/result";
 import { distanceName, stringifySeconds } from "../../shared/format";
+import { resultPagePath } from "../../shared/publicOrigin";
 
 import cn from "./stages.module.less";
 
@@ -42,10 +44,12 @@ const StagesBadge: FC<{ result: Result }> = ({ result }) => {
 };
 
 const ResultBadge: FC<{ result: Result }> = ({ result }) => (
-  <div className={cn.badge}>
-    <div>{stringifySeconds(result.result)}</div>
-    <div>{stringifySeconds(result.speed)}</div>
-  </div>
+  <Link to={resultPagePath(result.id)} className={cn.badgeLink}>
+    <div className={cn.badge}>
+      <div>{stringifySeconds(result.result)}</div>
+      <div>{stringifySeconds(result.speed)}</div>
+    </div>
+  </Link>
 );
 
 export { StagesBadge, ResultBadge, cn as stagesCn };

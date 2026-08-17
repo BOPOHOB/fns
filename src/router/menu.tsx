@@ -1,4 +1,4 @@
-import { CalendarOutlined, CrownOutlined, PlusOutlined, UsergroupAddOutlined } from "@ant-design/icons";
+import { AuditOutlined, CalendarOutlined, CrownOutlined, PlusOutlined, UsergroupAddOutlined } from "@ant-design/icons";
 import { Menu as AntdMenu, type MenuProps } from "antd";
 import { useCallback, useMemo, type FC } from "react";
 import { observer } from "mobx-react";
@@ -19,6 +19,11 @@ const useItems = (): NonNullable<MenuProps["items"]> => {
       ...c(session.isTrainer, { key: "/add", icon: <PlusOutlined />, label: "Добавить пловца" }),
       { key: "/teams", icon: <UsergroupAddOutlined />, label: "Группы" },
       {
+        key: "/trainer",
+        label: "Тренеры",
+        icon: <AuditOutlined />,
+      },
+      {
         key: "/workout",
         label: "Тренировки",
         icon: <CalendarOutlined />,
@@ -26,7 +31,7 @@ const useItems = (): NonNullable<MenuProps["items"]> => {
           key: `/${date}`,
           label: formatRuDate(dayjs(date)),
         })),
-      },
+      }
     ],
     [days],
   );

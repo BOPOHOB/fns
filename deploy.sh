@@ -22,6 +22,8 @@ set +a
 
 : "${YANDEX_CLIENT_ID:?YANDEX_CLIENT_ID missing in .env}"
 : "${YANDEX_CLIENT_SECRET:?YANDEX_CLIENT_SECRET missing in .env}"
+: "${BOT_TOKEN:?BOT_TOKEN missing in .env}"
+: "${CHAT_ID:?CHAT_ID missing in .env}"
 
 echo "==> Building frontend (client + SSR)…"
 npm run build
@@ -57,6 +59,11 @@ PORT=8787
 DENO_ENV=production
 DB_PATH=${REMOTE_DIR}/data.db
 PROJECT_ROOT=${REMOTE_DIR}
+BOT_TOKEN=${BOT_TOKEN}
+CHAT_ID=${CHAT_ID}
+CHAT_ID_SLAVA=${CHAT_ID_SLAVA:-}
+CHAT_ID_ANYA=${CHAT_ID_ANYA:-}
+CHAT_ID_ANY=${CHAT_ID_ANY:-}
 EOF
 ssh "$REMOTE" "chmod 600 ${REMOTE_DIR}/.env"
 

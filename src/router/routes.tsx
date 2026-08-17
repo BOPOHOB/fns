@@ -9,6 +9,7 @@ import { SegmentOutline } from "./segmentOutline";
 import { SegmentAdd, SegmentIndex } from "./segmentPages";
 import { ResultOutline } from "./resultOutline";
 import { ResultPage } from "../pages/result/result";
+import { TrainerPage } from "../pages/trainer/trainer";
 import type { MetaContext, RouteMeta } from "./meta";
 import { resultOgImageUrl, resultPageUrl } from "../shared/publicOrigin.ts";
 import { formatResultMeta } from "../shared/resultMeta.ts";
@@ -69,6 +70,17 @@ const routes: RouteObject[] = [
         Component: AddTeam,
         handle: {
           meta: { title: "Новая группа — FeelAndSwim" } satisfies RouteMeta,
+        },
+      },
+      {
+        id: "trainer",
+        path: "trainer",
+        Component: TrainerPage,
+        handle: {
+          meta: {
+            title: "Тренеры — FeelAndSwim",
+            description: "Слава и Аня — тренеры FeelAndSwim. Запись в группу и на индивидуальные занятия.",
+          } satisfies RouteMeta,
         },
       },
       {

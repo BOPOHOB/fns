@@ -27,4 +27,10 @@ const setSwimmerName = (swimmerId: number, name: string) =>
     body: JSON.stringify({ name }),
   });
 
-export { submitSwimmer, setSwimmerBirthDate, setSwimmerName, type CreateSwimmerBody };
+const setSwimmerSex = (swimmerId: number, sex: Sex) =>
+  apiFetch<{ sex: Sex }>(`/api/swimmers/${swimmerId}/sex`, {
+    method: 'PUT',
+    body: JSON.stringify({ sex }),
+  });
+
+export { submitSwimmer, setSwimmerBirthDate, setSwimmerName, setSwimmerSex, type CreateSwimmerBody };

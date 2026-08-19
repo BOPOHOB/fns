@@ -11,20 +11,24 @@ class Swimmer {
   teamId: number[];
   birthDate: string | undefined;
   name: string;
+  sex: Sex;
 
   constructor(private readonly data: SwimmerJSON, model: Results) {
     this.#model = new WeakRef(model);
     this.teamId = [...data.teamId];
     this.birthDate = data.birthDate;
     this.name = data.name;
+    this.sex = data.sex;
 
     makeObservable(this, {
       teamId: observable,
       birthDate: observable,
       name: observable,
+      sex: observable,
       setTeamIds: action,
       setBirthDate: action,
       setName: action,
+      setSex: action,
       bestSex: computed,
       bestGroup: computed,
       sexEmoji: computed,
@@ -45,6 +49,10 @@ class Swimmer {
 
   setName(name: string) {
     this.name = name;
+  }
+
+  setSex(sex: Sex) {
+    this.sex = sex;
   }
 
   get key() {
@@ -73,10 +81,6 @@ class Swimmer {
       swimmer.sex === this.sex &&
       swimmer.teamIds.some((id) => this.teamIds.includes(id))
     ) === this;
-  }
-
-  get sex() {
-    return this.data.sex;
   }
 
   get role() {

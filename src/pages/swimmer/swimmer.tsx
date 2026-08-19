@@ -9,6 +9,7 @@ import { useSession } from '../../model/session';
 import { PlusOutlined } from '@ant-design/icons';
 import { useResultsColumns, resultsTableScrollX } from '../results/useResultsColumns';
 import { AsyncInput } from '../../components/asyncInput';
+import { AsyncSwitch } from '../../components/asyncSwitch';
 import { CommonTable } from '../../components/commonTable';
 
 import cn from './swimmer.module.less';
@@ -31,7 +32,7 @@ const Swimmer = observer(() => {
 
   const meta = [
     teamNames || null,
-    swimmer.sex === 'male' ? 'мужской' : 'женский',
+    !session.isTrainer && (swimmer.sex === 'male' ? 'мужской' : 'женский'),
     swimmer.age !== undefined ? `${swimmer.age} лет` : null,
   ].filter(Boolean);
 
@@ -69,6 +70,16 @@ const Swimmer = observer(() => {
       <Typography.Paragraph type="secondary">
         <Space wrap size="small">
           {meta.length > 0 && <span>{meta.join(' · ')}</span>}
+          {session.isTrainer ? (
+            <AsyncSwitch
+              checked={swimmer.sex === 'male'}
+              checkedChildren="муж"
+              unCheckedChildren="жен"
+              onChange={(checked) =>
+                results.setSwimmerSex(swimmer.id, checked ? 'male' : 'female')
+              }
+            />
+          ) : null}
           {session.isTrainer ? (
             <DatePicker
               size="small"

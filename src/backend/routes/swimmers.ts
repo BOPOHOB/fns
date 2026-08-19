@@ -237,5 +237,46 @@ export function swimmersRoutes(db: Db, authConfig: AuthConfig | null) {
     }
   });
 
+  app.put('/:id/sex', async (c) => {
+    const auth = await resolveNonSwimmerUser(c, authConfig, db);
+    if (!auth.ok) {
+      return c.json({ error: auth.error }, auth.status);
+    }
+
+    const id = Number(c.req.param('id'));
+    if (!Number.isInteger(id) || id < 1) {
+      return c.json({ error: 'Invalid id' }, 400);
+    }
+
+    const existing = db
+      .prepare(`SELECT id FROM swimmer WHERE id = ?`)
+      .get(id) as { id: number } | undefined;
+    if (!existing) return c.json({ error: 'Not found' }, 404);
+
+    let body: unknown;
+    try {
+      body = await c.req.json();
+    } catch {
+      return c.json({ error: 'Invalid JSON body' }, 400);
+    }
+
+    if (typeof body !== 'object' || body === null) {
+      return c.json({ error: 'Invalid JSON body' }, 400);
+    }
+
+    const raw = body as Record<string, unknown>;
+    if (raw.sex !== 'male' && raw.sex !== 'female') {
+      return c.json({ error: 'Invalid sex' }, 400);
+    }
+    const sex = raw.sex as Sex;
+
+    try {
+      db.prepare(`UPDATE swimmer SET sex = ? WHERE id = ?`).run(sex, id);
+      return c.json({ sex });
+    } catch (e) {
+      return c.json({ error: e instanceof Error ? e.message : 'Update failed' }, 500);
+    }
+  });
+
   return app;
 }

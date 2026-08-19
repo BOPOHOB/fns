@@ -5,8 +5,9 @@ import { ResultSeries } from './resultSeries';
 import { Team } from './team';
 import { createContext, useContext } from "react";
 import { getResults, submitResult } from "../api/results";
-import { submitSwimmer, setSwimmerBirthDate, setSwimmerName, type CreateSwimmerBody } from "../api/swimmers";
+import { submitSwimmer, setSwimmerBirthDate, setSwimmerName, setSwimmerSex, type CreateSwimmerBody } from "../api/swimmers";
 import { submitTeam, setTeamMembers, setTeamTrainer, deleteTeam, type CreateTeamBody } from "../api/teams";
+import type { Sex } from "../types/swimmer";
 
 class Results {
   results = observable.array<Result>();
@@ -42,6 +43,7 @@ class Results {
       setTeamTrainer: action,
       setSwimmerBirthDate: action,
       setSwimmerName: action,
+      setSwimmerSex: action,
       deleteTeam: action,
       distances: computed,
       summaryTableRows: computed,
@@ -152,6 +154,14 @@ class Results {
     runInAction(() => {
       const swimmer = this.swimmers.find((s) => s.id === swimmerId);
       swimmer?.setName(saved);
+    });
+  }
+
+  async setSwimmerSex(swimmerId: number, sex: Sex) {
+    const { sex: saved } = await setSwimmerSex(swimmerId, sex);
+    runInAction(() => {
+      const swimmer = this.swimmers.find((s) => s.id === swimmerId);
+      swimmer?.setSex(saved);
     });
   }
 

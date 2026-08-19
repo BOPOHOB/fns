@@ -34,7 +34,10 @@ function distanceName(distance: number, short = false): string {
     return `${distance}${short ? "м" : plural(distance, [" метр", " метров", " метра"])}`;
   }
   if (distance === 1000) {
-    return "Километр";
+    return short ? "1км" : "Километр";
+  }
+  if (distance === 1200) {
+    return short ? "1200м" : "1200 метров";
   }
   const miles = distance / MILE;
   if (miles === Math.floor(miles)) {

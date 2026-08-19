@@ -13,6 +13,8 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "deploy": "bash deploy.sh",
+    "db:pull": "scp bopohob@191.215.39.234:/opt/feelandswim/data.db data.db",
+    "db:push": "scp data.db bopohob@191.215.39.234:/opt/feelandswim/data.db",
     "backend": "deno task backend",
     "agent": "agent --resume=6ace765c-5efd-409e-954f-c211ddcb2177"
   },

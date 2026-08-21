@@ -33,7 +33,7 @@ const useItems = (): NonNullable<MenuProps["items"]> => {
         })),
       }
     ],
-    [days],
+    [days, session.isTrainer],
   );
 };
 

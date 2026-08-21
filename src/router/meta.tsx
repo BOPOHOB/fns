@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useMatches } from "react-router";
 
 type RouteMeta = {
@@ -64,30 +64,35 @@ function useRouteMeta(): RouteMeta {
   );
 }
 
-/** Meta tags for SSR document head (and client <head> via portal-less render in layout). */
+function upsertMeta(attr: "name" | "property", key: string, content: string | undefined) {
+  if (!content) return;
+  const selector = `meta[${attr}="${key}"]`;
+  let el = document.querySelector(selector);
+  if (!el) {
+    el = document.createElement("meta");
+    el.setAttribute(attr, key);
+    document.head.appendChild(el);
+  }
+  el.setAttribute("content", content);
+}
+
+/** Client-only head sync. SSR meta comes from renderHeadTags in entry.server. */
 const DocumentMeta = ({ children }: { children?: ReactNode }) => {
   const meta = useRouteMeta();
   const title = meta.title ?? "FeelAndSwim";
 
-  return (
-    <>
-      <title>{title}</title>
-      {meta.description ? (
-        <meta name="description" content={meta.description} />
-      ) : null}
-      <meta property="og:title" content={title} />
-      {meta.description ? (
-        <meta property="og:description" content={meta.description} />
-      ) : null}
-      {meta.ogImage ? (
-        <meta property="og:image" content={meta.ogImage} />
-      ) : null}
-      {meta.ogUrl ? <meta property="og:url" content={meta.ogUrl} /> : null}
-      <meta property="og:type" content="website" />
-      <meta name="twitter:card" content="summary_large_image" />
-      {children}
-    </>
-  );
+  useEffect(() => {
+    document.title = title;
+    upsertMeta("name", "description", meta.description);
+    upsertMeta("property", "og:title", title);
+    upsertMeta("property", "og:description", meta.description);
+    upsertMeta("property", "og:image", meta.ogImage);
+    upsertMeta("property", "og:url", meta.ogUrl);
+    upsertMeta("property", "og:type", "website");
+    upsertMeta("name", "twitter:card", "summary_large_image");
+  }, [title, meta.description, meta.ogImage, meta.ogUrl]);
+
+  return children ?? null;
 };
 
 function metaFromMatches(matches: ReadonlyArray<MatchLike>): RouteMeta {

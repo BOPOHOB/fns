@@ -7,13 +7,34 @@ import type { Result, ResultCondition, WaterType } from '../../types/result.ts';
 import { ALLOWED_DISTANCES } from "@shared/distances.ts";
 
 const RESULT_COLUMNS = `
-  id, swimmer_id, result, distance, date, type, stages, notes, series_id, water
+  id, swimmer_id, result, distance, date, type, stages, notes, series_id, water,
+  swimfin, hand_paddle, pull_buoy, board, wetsuit
 `;
 
 const ALLOWED_TYPES = new Set<ResultCondition>(['competition', 'test', 'workout']);
 const ALLOWED_WATER = new Set<WaterType>(['quarter', 'fifty', 'open']);
 
 type CreateResultBody = Omit<Result, 'id'>;
+
+function parseBoolean(value: unknown, field: string): boolean | string {
+  if (value === undefined || value === null) return false;
+  if (typeof value !== 'boolean') return `Invalid ${field}`;
+  return value;
+}
+
+function parseEquipment(raw: Record<string, unknown>): Pick<Result, 'swimfin' | 'handPaddle' | 'pullBuoy' | 'board' | 'wetsuit'> | string {
+  const swimfin = parseBoolean(raw.swimfin, 'swimfin');
+  if (typeof swimfin === 'string') return swimfin;
+  const handPaddle = parseBoolean(raw.handPaddle, 'handPaddle');
+  if (typeof handPaddle === 'string') return handPaddle;
+  const pullBuoy = parseBoolean(raw.pullBuoy, 'pullBuoy');
+  if (typeof pullBuoy === 'string') return pullBuoy;
+  const board = parseBoolean(raw.board, 'board');
+  if (typeof board === 'string') return board;
+  const wetsuit = parseBoolean(raw.wetsuit, 'wetsuit');
+  if (typeof wetsuit === 'string') return wetsuit;
+  return { swimfin, handPaddle, pullBuoy, board, wetsuit };
+}
 
 function parseCreateBody(body: unknown): CreateResultBody | string {
   if (typeof body !== 'object' || body === null) {
@@ -82,6 +103,9 @@ function parseCreateBody(body: unknown): CreateResultBody | string {
     seriesId = id;
   }
 
+  const equipment = parseEquipment(raw);
+  if (typeof equipment === 'string') return equipment;
+
   const parsed: CreateResultBody = {
     swimmerId,
     result,
@@ -91,6 +115,7 @@ function parseCreateBody(body: unknown): CreateResultBody | string {
     water: raw.water as WaterType,
     stages,
     notes: raw.notes,
+    ...equipment,
   };
   if (seriesId !== undefined) parsed.seriesId = seriesId;
   return parsed;
@@ -194,8 +219,9 @@ export function resultsRoutes(db: Db, authConfig: AuthConfig | null) {
     try {
       const info = db.prepare(`
         INSERT INTO result (
-          swimmer_id, result, distance, date, type, stages, notes, series_id, water
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          swimmer_id, result, distance, date, type, stages, notes, series_id, water,
+          swimfin, hand_paddle, pull_buoy, board, wetsuit
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         parsed.swimmerId,
         parsed.result,
@@ -206,6 +232,11 @@ export function resultsRoutes(db: Db, authConfig: AuthConfig | null) {
         parsed.notes,
         parsed.seriesId ?? null,
         parsed.water,
+        parsed.swimfin ? 1 : 0,
+        parsed.handPaddle ? 1 : 0,
+        parsed.pullBuoy ? 1 : 0,
+        parsed.board ? 1 : 0,
+        parsed.wetsuit ? 1 : 0,
       );
 
       const id = Number(info.lastInsertRowid);

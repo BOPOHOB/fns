@@ -40,6 +40,11 @@ type Result = {
   water: WaterType;
   stages: Stages | null;
   notes: string;
+  swimfin: boolean;
+  handPaddle: boolean;
+  pullBuoy: boolean;
+  board: boolean;
+  wetsuit: boolean;
 };
 
 export type { DistanceName, ResultCondition, WaterType, Result, Stages };

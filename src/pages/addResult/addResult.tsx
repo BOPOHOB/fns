@@ -62,6 +62,11 @@ const AddResult = () => {
   } = useSeriesController();
   const [condition, setCondition] = useStorageState<ResultCondition>('workout', 'addResult.condition');
   const [notes, setNotes] = useState('');
+  const [swimfin, setSwimfin] = useStorageState(false, 'addResult.swimfin');
+  const [handPaddle, setHandPaddle] = useStorageState(false, 'addResult.handPaddle');
+  const [pullBuoy, setPullBuoy] = useStorageState(false, 'addResult.pullBuoy');
+  const [board, setBoard] = useStorageState(false, 'addResult.board');
+  const [wetsuit, setWetsuit] = useStorageState(false, 'addResult.wetsuit');
   const [stages, setStages] = useState<StagesRawInput[]>([[]]);
   const [stageInterval, setStageInterval] = useStorageState<Stage | null>(100, 'addResult.stage');
   const [autoMinute, setAutoMinute] = useStorageState<boolean>(true, 'addResult.lessTwo');
@@ -114,7 +119,11 @@ const AddResult = () => {
       result: null,
       distance: stageInterval
     });
-    setStages(stageInterval === null ? [[]] : new Array(repeat).fill(null).map(() => new Array(steps).fill(null).map(stageConstructor)));
+    setStages(new Array(repeat).fill(null).map(() => 
+      steps === 0 || !isFinite(steps)
+        ? []
+        : new Array(steps).fill(null).map(stageConstructor)
+    ));
   }, [repeat, stageInterval, distance, water])
 
   // Подравнять шаг
@@ -135,25 +144,44 @@ const AddResult = () => {
     }
   }, [distance]);
 
-  const [error, setError] = useState();
+  // Выключаем оборудование на открытой воде
+  useEffect(() => {
+    if (water === 'open') {
+      setSwimfin(false);
+      setHandPaddle(false);
+      setPullBuoy(false);
+      setBoard(false);
+    }
+  }, [water]);
+
+  const [error, setError] = useState<string>();
 
   const handleSave = async () => {
+    const req = {
+      swimmerId: swimmer.id,
+      distance,
+      result,
+      water,
+      type: condition,
+      date: date.toISOString(),
+      notes,
+      stages,
+      speed,
+      interval,
+      swimfin,
+      handPaddle,
+      pullBuoy,
+      board,
+      wetsuit,
+    };
+    console.log(req);
     try {
-      await results.addResult({
-        swimmerId: swimmer.id,
-        distance,
-        result,
-        water,
-        type: condition,
-        date: date.toISOString(),
-        notes,
-        stages,
-        speed,
-        interval
-      });
+      await results.addResult(req);
       navigate('/');
     } catch (error) {
-      setError(error);
+      if (error instanceof Error) {
+        setError(error.message);
+      }
     }
   };
 
@@ -292,6 +320,25 @@ const AddResult = () => {
         onChange={(e) => setCondition(e.target.value)}
         options={RESULT_CONDITION_OPTIONS}
       />
+      {water !== 'open' && (
+        <Space wrap className={cn.equipment}>
+          <Checkbox checked={swimfin} onChange={(e) => setSwimfin(e.target.checked)}>
+            Ласты
+          </Checkbox>
+          <Checkbox checked={handPaddle} onChange={(e) => setHandPaddle(e.target.checked)}>
+            Лопатки
+          </Checkbox>
+          <Checkbox checked={pullBuoy} onChange={(e) => setPullBuoy(e.target.checked)}>
+            Колобашка
+          </Checkbox>
+          <Checkbox checked={board} onChange={(e) => setBoard(e.target.checked)}>
+            Доска
+          </Checkbox>
+          <Checkbox checked={wetsuit} onChange={(e) => setWetsuit(e.target.checked)}>
+            Гидрик
+          </Checkbox>
+        </Space>
+      )}
       {water !== 'open' && (
         <div className={cn.row}>
           <InputNumber min={1} max={300} value={repeat || null} onChange={(v) => setRepeat(v ?? 0)} />

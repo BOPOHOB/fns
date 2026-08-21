@@ -14,11 +14,7 @@ class Session {
   #authError = observable.box<string | null>(null);
 
   constructor() {
-    if (import.meta.env.SSR) {
-      this.#user.set(null);
-    } else {
-      void this.loadMe();
-    }
+    this.#user.set(null);
 
     makeObservable(this, {
       loadMe: action,
@@ -28,6 +24,10 @@ class Session {
       isAuthenticated: computed,
       isTrainer: computed,
     });
+
+    if (!import.meta.env.SSR) {
+      void this.loadMe();
+    }
   }
 
   get isTrainer() {

@@ -31,6 +31,11 @@ export type ResultRow = {
   notes: string;
   series_id: number | null;
   water: string;
+  swimfin: number;
+  hand_paddle: number;
+  pull_buoy: number;
+  board: number;
+  wetsuit: number;
 };
 
 export type SeriesRow = {
@@ -91,6 +96,11 @@ export function mapResult(row: ResultRow): Result {
     water: row.water as WaterType,
     stages,
     notes: row.notes,
+    swimfin: row.swimfin !== 0,
+    handPaddle: row.hand_paddle !== 0,
+    pullBuoy: row.pull_buoy !== 0,
+    board: row.board !== 0,
+    wetsuit: row.wetsuit !== 0,
   };
   if (row.series_id != null) result.seriesId = row.series_id;
   return result;

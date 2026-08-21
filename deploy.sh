@@ -87,7 +87,6 @@ EOF
 fi
 
 echo "==> Applying DB migrations…"
-ssh "$REMOTE" "bash -s ${REMOTE_DIR}/data.db" < "${ROOT}/scripts/db-migrate-equipment.sh"
 
 echo "==> Installing service, clearing OG cache, reloading nginx…"
 ssh "$REMOTE" bash -s <<EOF

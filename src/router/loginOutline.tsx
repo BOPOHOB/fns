@@ -6,7 +6,7 @@ import { Avatar, Button, Drawer, Space } from "antd";
 import Text from "antd/es/typography/Text";
 import { observer } from "mobx-react";
 
-import logo from './logo.jpg';
+import logo from './logo.svg';
 import { LoginOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { Menu } from "./menu";
@@ -45,7 +45,7 @@ const LoginOutline = observer(() => {
           />
         )}
         <nav>
-          <Link to="/"><img src={logo} alt="logo" /></Link>
+        <Link to="/"><img src={logo} alt="logo" /></Link>
           {!isPhoneNav && (
             <div className={cn.menu}>
               <Menu mode="horizontal" />

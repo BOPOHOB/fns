@@ -246,6 +246,50 @@ export function resultsRoutes(db: Db, authConfig: AuthConfig | null) {
     }
   });
 
+  app.put('/:id/date', async (c) => {
+    const auth = await resolveNonSwimmerUser(c, authConfig, db);
+    if (!auth.ok) {
+      return c.json({ error: auth.error }, auth.status);
+    }
+
+    const id = Number(c.req.param('id'));
+    if (!Number.isInteger(id) || id < 1) {
+      return c.json({ error: 'Invalid id' }, 400);
+    }
+
+    const existing = db
+      .prepare(`SELECT id FROM result WHERE id = ?`)
+      .get(id) as { id: number } | undefined;
+    if (!existing) return c.json({ error: 'Not found' }, 404);
+
+    let body: unknown;
+    try {
+      body = await c.req.json();
+    } catch {
+      return c.json({ error: 'Invalid JSON body' }, 400);
+    }
+
+    if (typeof body !== 'object' || body === null) {
+      return c.json({ error: 'Invalid JSON body' }, 400);
+    }
+
+    const raw = body as Record<string, unknown>;
+    if (typeof raw.date !== 'string' || !raw.date.trim()) {
+      return c.json({ error: 'Invalid date' }, 400);
+    }
+    const date = raw.date.trim();
+    if (Number.isNaN(Date.parse(date))) {
+      return c.json({ error: 'Invalid date' }, 400);
+    }
+
+    try {
+      db.prepare(`UPDATE result SET date = ? WHERE id = ?`).run(date, id);
+      return c.json({ date });
+    } catch (e) {
+      return c.json({ error: e instanceof Error ? e.message : 'Update failed' }, 500);
+    }
+  });
+
   app.get('/:id', (c) => {
     const id = Number(c.req.param('id'));
     if (!Number.isInteger(id) || id < 1) return c.json({ error: 'Invalid id' }, 400);

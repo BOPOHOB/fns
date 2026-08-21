@@ -42,4 +42,10 @@ const submitResult = async (result: Omit<Result, 'id' | 'result' | 'stages'> & {
   }
 }
 
-export { getResults, submitResult };
+const setResultDate = (resultId: number, date: string) =>
+  apiFetch<{ date: string }>(`/api/results/${resultId}/date`, {
+    method: 'PUT',
+    body: JSON.stringify({ date }),
+  });
+
+export { getResults, submitResult, setResultDate };

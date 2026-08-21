@@ -1,13 +1,21 @@
 import dayjs from "dayjs";
+import { action, makeObservable, observable } from "mobx";
 import type { ResultCondition, Result as ResultJSON } from "../types/result";
 import type { Results } from "./results";
 import { distanceName } from "../pages/addResult/distanceSelect";
 
 class Result {
   readonly #model: WeakRef<Results>;
+  dateIso: string;
 
   constructor(private readonly data: ResultJSON, model: Results) {
     this.#model = new WeakRef(model);
+    this.dateIso = data.date;
+
+    makeObservable(this, {
+      dateIso: observable,
+      setDate: action,
+    });
   }
 
   get id() {
@@ -62,7 +70,11 @@ class Result {
   }
 
   get date() {
-    return dayjs(this.data.date);
+    return dayjs(this.dateIso);
+  }
+
+  setDate(date: string) {
+    this.dateIso = date;
   }
 
   get stageStep() {

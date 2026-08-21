@@ -1,16 +1,20 @@
+import { useState, type FC } from 'react';
 import type { ColumnsType } from 'antd/es/table';
-import { Button, Space, notification } from 'antd';
+import { Button, DatePicker, Space, notification } from 'antd';
 import { ShareAltOutlined } from '@ant-design/icons';
 import { Link } from 'react-router';
+import { observer } from 'mobx-react';
+import dayjs, { type Dayjs } from 'dayjs';
 import type { ResultCondition, WaterType } from '../../types/result';
 import type { Result } from '../../model/result';
 
 import type { Swimmer } from '../../model/swimmer';
-import type { Dayjs } from 'dayjs';
 import { formatRuDate } from '../../utils/formatRuDate';
 import { ResultBadge, StagesBadge, stagesCn } from './stages';
 import { c } from '../../utils/c';
 import { resultPagePath, resultPageUrl } from '../../shared/publicOrigin';
+import { useSession } from '../../model/session';
+import { useResults } from '../../model/results';
 
 const CONDITION_LABEL: Record<ResultCondition | 'open', string> = {
   competition: 'Соревнования',
@@ -40,6 +44,43 @@ function resultsTableScrollX(kind: "swimmer" | "day"): number {
   return kind === "day" ? 800 : 700;
 }
 
+const ResultDateCell: FC<{ result: Result }> = observer(({ result }) => {
+  const session = useSession();
+  const results = useResults();
+  const [saving, setSaving] = useState(false);
+
+  if (!session.isTrainer) {
+    return formatRuDate(result.date) ?? '—';
+  }
+
+  const onChange = async (value: Dayjs | null) => {
+    if (!value) return;
+    const next = result.date
+      .year(value.year())
+      .month(value.month())
+      .date(value.date())
+      .toISOString();
+    if (next === result.dateIso) return;
+    setSaving(true);
+    try {
+      await results.setResultDate(result.id, next);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <DatePicker
+      size="small"
+      format="DD.MM.YYYY"
+      allowClear={false}
+      disabled={saving}
+      value={result.date.isValid() ? result.date : dayjs()}
+      onChange={(d) => void onChange(d)}
+    />
+  );
+});
+
 function useResultsColumns(kind: 'swimmer' | 'day'): ColumnsType<Result> {
   return [
     ...c(kind === 'day', {
@@ -66,8 +107,8 @@ function useResultsColumns(kind: 'swimmer' | 'day'): ColumnsType<Result> {
     ...c(kind === 'swimmer', {
       title: 'Дата',
       dataIndex: 'date',
-      width: 120,
-      render: (v?: Dayjs) => formatRuDate(v) ?? '—',
+      width: 140,
+      render: (_: never, result: Result) => <ResultDateCell result={result} />,
     }),
     {
       title: 'Вода',

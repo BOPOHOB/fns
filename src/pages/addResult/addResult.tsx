@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Button, DatePicker, Radio, Typography, Space, Alert, InputNumber, Tooltip, Checkbox } from 'antd';
+import { Button, DatePicker, Radio, Typography, Space, Alert, InputNumber, Tooltip, Checkbox, type CheckboxProps } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { Link, useNavigate } from 'react-router';
 import type { ResultCondition, WaterType } from '../../types/result';
@@ -21,6 +21,18 @@ import { CloseCircleOutlined, WarningOutlined } from '@ant-design/icons';
 import { normalizeSpeed, isSpeedDistributed, stagesSpeed, speedOutOfRange } from './speedChecker';
 import clsx from "clsx";
 import { useLatest } from '../../utils/useLatest';
+import { CheckboxButton } from '../../components/checkboxButton';
+import {
+  BoardIcon,
+  BreakBeltIcon,
+  FingerPaddleIcon,
+  HandPaddleIcon,
+  MonofinIcon,
+  PullBuoyIcon,
+  SnorkelIcon,
+  SwimfinIcon,
+  WetsuitIcon,
+} from './equipment/icons';
 
 export const RESULT_CONDITION_OPTIONS: { value: ResultCondition; label: string }[] = [
   { value: 'competition', label: 'Соревнования' },
@@ -63,13 +75,39 @@ const AddResult = () => {
   const [condition, setCondition] = useStorageState<ResultCondition>('workout', 'addResult.condition');
   const [notes, setNotes] = useState('');
   const [swimfin, setSwimfin] = useStorageState(false, 'addResult.swimfin');
+  const [fingerPaddle, setFingerPaddle] = useStorageState(false, 'addResult.fingerPaddle');
   const [handPaddle, setHandPaddle] = useStorageState(false, 'addResult.handPaddle');
   const [pullBuoy, setPullBuoy] = useStorageState(false, 'addResult.pullBuoy');
   const [board, setBoard] = useStorageState(false, 'addResult.board');
   const [wetsuit, setWetsuit] = useStorageState(false, 'addResult.wetsuit');
+  const [breakBelt, setBreakBelt] = useStorageState(false, 'addResult.breakBelt');
+  const [snorkel, setSnorkel] = useStorageState(false, 'addResult.snorkel');
+  const [monofin, setMonofin] = useStorageState(false, 'addResult.monofin');
   const [stages, setStages] = useState<StagesRawInput[]>([[]]);
   const [stageInterval, setStageInterval] = useStorageState<Stage | null>(100, 'addResult.stage');
-  const [autoMinute, setAutoMinute] = useStorageState<boolean>(true, 'addResult.lessTwo');
+  const [autoMinute, setAutoMinute] = useStorageState<0 | 1 | 2>(0, 'addResult.lessTwo');
+  const [oneMin, setOneMin] = useState<boolean>(autoMinute === 1);
+  const [twoMin, setTwoMin] = useState<boolean>(autoMinute === 2);
+  const oneMinHolder: CheckboxProps["onChange"] = (e) => {
+    const checked = e.target.checked;
+    setOneMin(checked);
+    if (checked) {
+      setTwoMin(false);
+      setAutoMinute(1);
+    } else {
+      setAutoMinute(0);
+    }
+  };
+  const twoMinHolder: CheckboxProps["onChange"] = (e) => {
+    const checked = e.target.checked;
+    setTwoMin(checked);
+    if (checked) {
+      setOneMin(false);
+      setAutoMinute(2);
+    } else {
+      setAutoMinute(0);
+    }
+  };
 
   const setResultItem = (id: number) => (value: number | null) => {
     const newResult = [...result];
@@ -173,6 +211,10 @@ const AddResult = () => {
       pullBuoy,
       board,
       wetsuit,
+      fingerPaddle,
+      breakBelt,
+      snorkel,
+      monofin
     };
     console.log(req);
     try {
@@ -201,7 +243,7 @@ const AddResult = () => {
   }
 
   const stagesSelector = (
-    <div className={cn.row}>
+    <div className={cn.stageInputParamRow}>
       <Radio.Group
         className={cn.waterSelector}
         optionType="button"
@@ -209,9 +251,14 @@ const AddResult = () => {
         onChange={(e) => {setStageInterval(e.target.value === 0 ? null : e.target.value);}}
         options={STAGE_INTERVALS.map(v => ({ ...v, disabled: !isHaveMultiplicity(distance, v.value) }))}
       />
-      <Tooltip title="Добавлять сразу 1: при простановке разбивки, если пловец плывёт в диапазоне от 1 до 2 минут на сотню"> 
-        <Checkbox checked={autoMinute} onChange={(e) => {setAutoMinute(e.target.checked); console.log(e.target.checked)}}>1:....</Checkbox>
-      </Tooltip>
+      <div className={cn.autoMinute}>
+        <Tooltip placement='left' title="Добавлять сразу 1: при простановке разбивки, если пловец плывёт в диапазоне от 1 до 2 минут на сотню"> 
+          <Checkbox checked={oneMin} onChange={oneMinHolder}>1:....</Checkbox>
+        </Tooltip>
+        <Tooltip placement='left' title="Добавлять сразу 2: при простановке разбивки, если пловец плывёт в диапазоне от 2 до 3 минут на сотню"> 
+          <Checkbox checked={twoMin} onChange={twoMinHolder}>2:....</Checkbox>
+        </Tooltip>
+      </div>
     </div>
   );
 
@@ -321,23 +368,35 @@ const AddResult = () => {
         options={RESULT_CONDITION_OPTIONS}
       />
       {water !== 'open' && (
-        <Space wrap className={cn.equipment}>
-          <Checkbox checked={swimfin} onChange={(e) => setSwimfin(e.target.checked)}>
-            Ласты
-          </Checkbox>
-          <Checkbox checked={handPaddle} onChange={(e) => setHandPaddle(e.target.checked)}>
-            Лопатки
-          </Checkbox>
-          <Checkbox checked={pullBuoy} onChange={(e) => setPullBuoy(e.target.checked)}>
-            Колобашка
-          </Checkbox>
-          <Checkbox checked={board} onChange={(e) => setBoard(e.target.checked)}>
-            Доска
-          </Checkbox>
-          <Checkbox checked={wetsuit} onChange={(e) => setWetsuit(e.target.checked)}>
-            Гидрик
-          </Checkbox>
-        </Space>
+        <div className={cn.equipment}>
+          <Tooltip title="Ласты">
+            <CheckboxButton className={cn.equipmentBtn} icon={<SwimfinIcon />} checked={swimfin} onChange={(e) => setSwimfin(e.target.checked)} />
+          </Tooltip>
+          <Tooltip title="Кистевые лопатки">
+            <CheckboxButton className={cn.equipmentBtn} icon={<FingerPaddleIcon />} checked={fingerPaddle} onChange={(e) => setFingerPaddle(e.target.checked)} />
+          </Tooltip>
+          <Tooltip title="Большие лопатки">
+            <CheckboxButton className={cn.equipmentBtn} icon={<HandPaddleIcon />} checked={handPaddle} onChange={(e) => setHandPaddle(e.target.checked)} />
+          </Tooltip>
+          <Tooltip title="Колобашка">
+            <CheckboxButton className={cn.equipmentBtn} icon={<PullBuoyIcon />} checked={pullBuoy} onChange={(e) => setPullBuoy(e.target.checked)} />
+          </Tooltip>
+          <Tooltip title="Доска">
+            <CheckboxButton className={cn.equipmentBtn} icon={<BoardIcon />} checked={board} onChange={(e) => setBoard(e.target.checked)} />
+          </Tooltip>
+          <Tooltip title="Тормоза">
+            <CheckboxButton className={cn.equipmentBtn} icon={<BreakBeltIcon />} checked={breakBelt} onChange={(e) => setBreakBelt(e.target.checked)} />
+          </Tooltip>
+          <Tooltip title="Трубка">
+            <CheckboxButton className={cn.equipmentBtn} icon={<SnorkelIcon />} checked={snorkel} onChange={(e) => setSnorkel(e.target.checked)} />
+          </Tooltip>
+          <Tooltip title="Гидрокостюм">
+            <CheckboxButton className={cn.equipmentBtn} icon={<WetsuitIcon />} checked={wetsuit} onChange={(e) => setWetsuit(e.target.checked)} />
+          </Tooltip>
+          <Tooltip title="Моноласта">
+            <CheckboxButton className={cn.equipmentBtn} icon={<MonofinIcon />} checked={monofin} onChange={(e) => setMonofin(e.target.checked)} />
+          </Tooltip>
+        </div>
       )}
       {water !== 'open' && (
         <div className={cn.row}>

@@ -13,8 +13,8 @@ const StagesMatrix: FC<{
   step: Stage,
   inputClassName?: string;
   results: Array<number | null>;
-  autoMinute?: boolean;
-}> = ({ onChange, value, step, inputClassName, results, autoMinute=false }) => {
+  autoMinute?: 0 | 1 | 2;
+}> = ({ onChange, value, step, inputClassName, results, autoMinute = 0 }) => {
   const matrix: Array<ReactElement> = [];
 
   const onStageChange = (colIdx: number, index: number) => (val: null | number) => {

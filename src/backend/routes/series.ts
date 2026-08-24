@@ -9,7 +9,7 @@ import { ALLOWED_DISTANCES } from "@shared/distances.ts";
 
 const RESULT_COLUMNS = `
   id, swimmer_id, result, distance, date, type, stages, notes, series_id, water,
-  swimfin, hand_paddle, pull_buoy, board, wetsuit
+  swimfin, finger_paddle, hand_paddle, pull_buoy, board, break_belt, snorkel, wetsuit, monofin
 `;
 
 const ALLOWED_TYPES = new Set<ResultCondition>(['competition', 'test', 'workout']);
@@ -21,18 +21,49 @@ function parseBoolean(value: unknown, field: string): boolean | string {
   return value;
 }
 
-function parseEquipment(raw: Record<string, unknown>): Pick<Result, 'swimfin' | 'handPaddle' | 'pullBuoy' | 'board' | 'wetsuit'> | string {
+type EquipmentFields = Pick<
+  Result,
+  | 'swimfin'
+  | 'fingerPaddle'
+  | 'handPaddle'
+  | 'pullBuoy'
+  | 'board'
+  | 'breakBelt'
+  | 'snorkel'
+  | 'wetsuit'
+  | 'monofin'
+>;
+
+function parseEquipment(raw: Record<string, unknown>): EquipmentFields | string {
   const swimfin = parseBoolean(raw.swimfin, 'swimfin');
   if (typeof swimfin === 'string') return swimfin;
+  const fingerPaddle = parseBoolean(raw.fingerPaddle, 'fingerPaddle');
+  if (typeof fingerPaddle === 'string') return fingerPaddle;
   const handPaddle = parseBoolean(raw.handPaddle, 'handPaddle');
   if (typeof handPaddle === 'string') return handPaddle;
   const pullBuoy = parseBoolean(raw.pullBuoy, 'pullBuoy');
   if (typeof pullBuoy === 'string') return pullBuoy;
   const board = parseBoolean(raw.board, 'board');
   if (typeof board === 'string') return board;
+  const breakBelt = parseBoolean(raw.breakBelt, 'breakBelt');
+  if (typeof breakBelt === 'string') return breakBelt;
+  const snorkel = parseBoolean(raw.snorkel, 'snorkel');
+  if (typeof snorkel === 'string') return snorkel;
   const wetsuit = parseBoolean(raw.wetsuit, 'wetsuit');
   if (typeof wetsuit === 'string') return wetsuit;
-  return { swimfin, handPaddle, pullBuoy, board, wetsuit };
+  const monofin = parseBoolean(raw.monofin, 'monofin');
+  if (typeof monofin === 'string') return monofin;
+  return {
+    swimfin,
+    fingerPaddle,
+    handPaddle,
+    pullBuoy,
+    board,
+    breakBelt,
+    snorkel,
+    wetsuit,
+    monofin,
+  };
 }
 
 /** Тело POST /api/series — как на фронте в submitResult при repeat > 1. */
@@ -195,8 +226,8 @@ export function seriesRoutes(db: Db, authConfig: AuthConfig | null) {
     const insertResult = db.prepare(`
       INSERT INTO result (
         swimmer_id, result, distance, date, type, stages, notes, series_id, water,
-        swimfin, hand_paddle, pull_buoy, board, wetsuit
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?)
+        swimfin, finger_paddle, hand_paddle, pull_buoy, board, break_belt, snorkel, wetsuit, monofin
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     const insertSeries = db.prepare(`
       INSERT INTO result_series (date, regime, speed, repetitions)
@@ -222,10 +253,14 @@ export function seriesRoutes(db: Db, authConfig: AuthConfig | null) {
           parsed.notes,
           parsed.water,
           parsed.swimfin ? 1 : 0,
+          parsed.fingerPaddle ? 1 : 0,
           parsed.handPaddle ? 1 : 0,
           parsed.pullBuoy ? 1 : 0,
           parsed.board ? 1 : 0,
+          parsed.breakBelt ? 1 : 0,
+          parsed.snorkel ? 1 : 0,
           parsed.wetsuit ? 1 : 0,
+          parsed.monofin ? 1 : 0,
         );
         resultIds.push(Number(info.lastInsertRowid));
       }

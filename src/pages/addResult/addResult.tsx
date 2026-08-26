@@ -337,19 +337,21 @@ const AddResult = () => {
     <div className={cn.page}>
       <Typography.Title level={3}>
         Добавить результат — <Link to={`/${swimmer.id}`}>{swimmer.name}</Link>
-      </Typography.Title>
+      </Typography.Title> 
+      <div className={cn.row}>
+        <DistanceSelect
+          className={cn.field}
+          value={distance}
+          onChange={setDistance}
+        />
 
-      <DistanceSelect
-        className={cn.field}
-        value={distance}
-        onChange={setDistance}
-      />
-      <DatePicker
-        className={cn.field}
-        format="DD.MM.YYYY"
-        value={date}
-        onChange={(d) => d && setDate(d)}
-      />
+        <DatePicker
+          className={cn.field}
+          format="DD.MM.YYYY"
+          value={date}
+          onChange={(d) => d && setDate(d)}
+        />
+      </div>
       <Radio.Group
         className={cn.field}
         optionType="button"
@@ -398,44 +400,46 @@ const AddResult = () => {
           </Tooltip>
         </div>
       )}
-      {water !== 'open' && (
-        <div className={cn.row}>
-          <InputNumber min={1} max={300} value={repeat || null} onChange={(v) => setRepeat(v ?? 0)} />
-          <p>{plural(repeat, ['повторение', 'повторений', 'повторения'])}</p>
-        </div>
-      )}
-      {repeat > 1 && (
-        <>
-          <div className={cn.tripletTitle}>
-            <p>Режим</p>
-            <p>Темп</p>
-            <p>Пауза</p>
+      <div className={cn.repeatRow}>
+        {water !== 'open' && (
+          <div className={cn.row}>
+            <InputNumber className={cn.repeat} min={1} max={300} value={repeat || null} onChange={(v) => setRepeat(v ?? 0)} />
+            <p>{plural(repeat, ['повторение', 'повторений', 'повторения'])}</p>
           </div>
-          <div className={cn.triplet}>
-            <TimeInput
-              className={cn.field}
-              value={interval}
-              onChange={setInterval}
-              placeholder="Интервал"
-              disabled={repeat === 1}
-            />
-            <TimeInput
-              className={cn.field}
-              value={speed}
-              onChange={setSpeed}
-              placeholder="Темп"
-              disabled={repeat === 1}
-            />
-            <TimeInput
-              className={cn.field}
-              value={pause}
-              onChange={setPause}
-              placeholder="Пауза"
-              disabled={repeat === 1}
-            />
+        )}
+        {repeat > 1 && (
+          <div className={cn.tripletContainer}>
+            <div className={cn.tripletTitle}>
+              <p>Режим</p>
+              <p>Темп</p>
+              <p>Пауза</p>
+            </div>
+            <div className={cn.triplet}>
+              <TimeInput
+                className={cn.field}
+                value={interval}
+                onChange={setInterval}
+                placeholder="Интервал"
+                disabled={repeat === 1}
+              />
+              <TimeInput
+                className={cn.field}
+                value={speed}
+                onChange={setSpeed}
+                placeholder="Темп"
+                disabled={repeat === 1}
+              />
+              <TimeInput
+                className={cn.field}
+                value={pause}
+                onChange={setPause}
+                placeholder="Пауза"
+                disabled={repeat === 1}
+              />
+            </div>
           </div>
-        </>
-      )}
+        )}
+      </div>
       <div className={cn.scroll}>
         <div className={clsx(cn.results, stageInterval === null && cn.wrap)}>
           {

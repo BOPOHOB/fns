@@ -33,7 +33,7 @@ function isValidTimeInput(input: string): boolean {
 }
 
 const TimeInput: FC<Omit<InputProps, 'value' | 'onChange' | 'status'> & { autoMinute?: 0 | 1 | 2; value: number | null, onChange: ((v: number | null) => void) }> = 
-({ value, onChange, autoMinute = false, ...spread }) => {
+({ value, onChange, autoMinute = 0, ...spread }) => {
   const [input, setInput] = useState(stringifySeconds(value));
   const status: InputProps['status'] = isValidTimeInput(input) || input === '' ? (value < 0 ? 'error' : undefined) : 'warning';
 

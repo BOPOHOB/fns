@@ -6,24 +6,41 @@
   flex-direction: column;
   gap: 12px;
 
-  .triplet {
+  .tripletContainer {
     display: flex;
-    gap: 8px;
-  }
-  .tripletTitle {
-    display: flex;
-    gap: 8px;
-    margin-bottom: -12px;
-    >p {
-      width: 33.333%;
-      margin-left: 8px;
-      font-size: 70%;
+    flex-direction: column;
+    .triplet {
+      display: flex;
+      gap: 8px;
+    }
+    .tripletTitle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: -2px;
+      margin-top: -11px;
+      >p {
+        width: 33.333%;
+        margin-left: 8px;
+        font-size: 70%;
+      }
     }
   }
-  .row, .results {
+
+  .repeat {
+    width: 60px;
+  }
+
+  .repeatRow,.row, .results {
     gap: 8px;
     display: flex;
     justify-content: start;
+  }
+
+  .repeatRow {
+    align-items: end;
+  }
+
+  .row, .results {
     align-items: baseline;
 
     &.wrap {
@@ -44,7 +61,7 @@
     flex-direction: column;
     gap: 12px;
 
-    .waterSelector {
+    .stageInputParamRow {
       position: sticky;
       left: 0px;
     }
@@ -58,6 +75,7 @@
   .stageInputParamRow {
     display: flex;
     align-items: center;
+    width: calc(100% - 10px);
     .autoMinute {
       width: 50px;
     }

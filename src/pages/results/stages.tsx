@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import type { Result } from "../../model/result";
 import { distanceName, stringifySeconds } from "../../shared/format";
 import { resultPagePath } from "../../shared/publicOrigin";
+import type { ResultRow } from "../../model/resultRow";
 
 import cn from "./stages.module.less";
 
@@ -45,7 +46,7 @@ const StagesBadge: FC<{ result: Result }> = ({ result }) => {
   return <div className={cn.stages}>{badges}</div>;
 };
 
-const ResultBadge: FC<{ result: Result }> = ({ result }) => (
+const ResultBadge: FC<{ result: ResultRow }> = ({ result }) => (
   <Link to={resultPagePath(result.id)} className={cn.badgeLink}>
     <div className={cn.badge}>
       <div>{stringifySeconds(result.result)}</div>

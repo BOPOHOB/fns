@@ -4,7 +4,7 @@ import { Swimmer } from './swimmer';
 import { ResultSeries } from './resultSeries';
 import { Team } from './team';
 import { createContext, useContext } from "react";
-import { getResults, submitResult, setResultDate } from "../api/results";
+import { getResults, submitResult } from "../api/results";
 import { submitSwimmer, setSwimmerBirthDate, setSwimmerName, setSwimmerSex, type CreateSwimmerBody } from "../api/swimmers";
 import { submitTeam, setTeamMembers, setTeamTrainer, deleteTeam, type CreateTeamBody } from "../api/teams";
 import type { Sex } from "../types/swimmer";
@@ -37,7 +37,6 @@ class Results {
       swimmersMap: computed,
       lader: computed,
       addResult: action,
-      setResultDate: action,
       addSwimmer: action,
       addTeam: action,
       setTeamMembers: action,
@@ -103,14 +102,6 @@ class Results {
         this.results.push(new Result(result, this));
       }
     }));
-  }
-
-  async setResultDate(resultId: number, date: string) {
-    const { date: saved } = await setResultDate(resultId, date);
-    runInAction(() => {
-      const result = this.results.find((r) => r.id === resultId);
-      result?.setDate(saved);
-    });
   }
 
   async addSwimmer(data: CreateSwimmerBody) {

@@ -8,12 +8,13 @@ import { formatRuDate } from "../../utils/formatRuDate";
 import { stringifySeconds } from "../../utils/stringifySeconds";
 
 import cn from "./result.module.less";
+import { ResultRow } from "../../model/resultRow";
 
 const ResultPage = observer(() => {
   const result = useResult();
   const columns = useResultsColumns("swimmer");
   const series = result.series;
-  const rows = series ? series.results : [result];
+  const rows = [new ResultRow(series || result)];
   const swimmer = result.swimmer;
 
   const title = series

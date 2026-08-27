@@ -6,7 +6,6 @@ import { Link } from 'react-router';
 import { observer } from 'mobx-react';
 import dayjs, { type Dayjs } from 'dayjs';
 import type { ResultCondition, WaterType } from '../../types/result';
-import type { Result } from '../../model/result';
 
 import type { Swimmer } from '../../model/swimmer';
 import { formatRuDate } from '../../utils/formatRuDate';
@@ -14,7 +13,10 @@ import { ResultBadge, StagesBadge, stagesCn } from './stages';
 import { c } from '../../utils/c';
 import { resultPagePath, resultPageUrl } from '../../shared/publicOrigin';
 import { useSession } from '../../model/session';
-import { useResults } from '../../model/results';
+import type { ResultRow } from '../../model/resultRow';
+
+import cn from './useResultsColumns.module.less'
+import { distanceName, stringifySeconds } from '../../shared/format';
 
 const CONDITION_LABEL: Record<ResultCondition | 'open', string> = {
   competition: 'Соревнования',
@@ -29,7 +31,13 @@ const WATER_LABEL: Record<WaterType, string> = {
   open: 'Открытая вода',
 };
 
-const renderStages = (_: never, result: Result) => <StagesBadge result={result} />
+const renderStages = (_: never, result: ResultRow) => (
+  <div className={cn.results} style={{minWidth: Math.floor(result.results.reduce((sum, cur) => sum += (cur.stages.length || 1),0) / 3) * 56 - 1 }}>
+    {
+      result.results.map((result) => <StagesBadge key={result.id} result={result} />)
+    }
+  </div>
+);
 
 async function copyResultLink(resultId: number) {
   await navigator.clipboard.writeText(resultPageUrl(resultId));
@@ -44,9 +52,8 @@ function resultsTableScrollX(kind: "swimmer" | "day"): number {
   return kind === "day" ? 800 : 700;
 }
 
-const ResultDateCell: FC<{ result: Result }> = observer(({ result }) => {
+const ResultDateCell: FC<{ result: ResultRow }> = observer(({ result }) => {
   const session = useSession();
-  const results = useResults();
   const [saving, setSaving] = useState(false);
 
   if (!session.isTrainer) {
@@ -55,15 +62,9 @@ const ResultDateCell: FC<{ result: Result }> = observer(({ result }) => {
 
   const onChange = async (value: Dayjs | null) => {
     if (!value) return;
-    const next = result.date
-      .year(value.year())
-      .month(value.month())
-      .date(value.date())
-      .toISOString();
-    if (next === result.dateIso) return;
     setSaving(true);
     try {
-      await results.setResultDate(result.id, next);
+      await result.setDate(value);
     } finally {
       setSaving(false);
     }
@@ -81,7 +82,7 @@ const ResultDateCell: FC<{ result: Result }> = observer(({ result }) => {
   );
 });
 
-function useResultsColumns(kind: 'swimmer' | 'day'): ColumnsType<Result> {
+function useResultsColumns(kind: 'swimmer' | 'day'): ColumnsType<ResultRow> {
   return [
     ...c(kind === 'day', {
       title: 'Пловец',
@@ -95,10 +96,15 @@ function useResultsColumns(kind: 'swimmer' | 'day'): ColumnsType<Result> {
       title: 'Результат',
       dataIndex: 'time',
       width: 80,
-      render: (_: never, result: Result) => <ResultBadge result={result} />,
+      render: (_: never, result: ResultRow) => (
+        <div>
+          {result.isSeries && (<p style={{ textAlign: 'center'}}>{result.results.length}x{distanceName(result.distance, true)}</p>)}
+          <ResultBadge result={result} />
+        </div>
+      ),
     },
     {
-      title: 'Разбив',
+      title: 'Разбивка',
       dataIndex: 'stages',
       // Гибкая колонка: забирает остаток ширины — внутри flex может переносить бейджи
       onCell: () => ({ className: stagesCn.stagesCell }),
@@ -108,7 +114,7 @@ function useResultsColumns(kind: 'swimmer' | 'day'): ColumnsType<Result> {
       title: 'Дата',
       dataIndex: 'date',
       width: 140,
-      render: (_: never, result: Result) => <ResultDateCell result={result} />,
+      render: (_: never, result: ResultRow) => <ResultDateCell result={result} />,
     }),
     {
       title: 'Вода',
@@ -126,7 +132,7 @@ function useResultsColumns(kind: 'swimmer' | 'day'): ColumnsType<Result> {
       title: 'Поделиться',
       key: 'share',
       width: 180,
-      render: (_: never, result: Result) => (
+      render: (_: never, result: ResultRow) => (
         <Space size={0}>
           <Button
             type="link"

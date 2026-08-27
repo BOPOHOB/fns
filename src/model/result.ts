@@ -1,20 +1,20 @@
-import dayjs from "dayjs";
-import { action, makeObservable, observable } from "mobx";
+import dayjs, { Dayjs } from "dayjs";
+import { makeObservable, observable, runInAction } from "mobx";
 import type { ResultCondition, Result as ResultJSON } from "../types/result";
 import type { Results } from "./results";
 import { distanceName } from "../pages/addResult/distanceSelect";
+import { setResultDate } from "../api/results";
 
 class Result {
   readonly #model: WeakRef<Results>;
-  dateIso: string;
+  date: Dayjs;
 
   constructor(private readonly data: ResultJSON, model: Results) {
     this.#model = new WeakRef(model);
-    this.dateIso = data.date;
+    this.date = dayjs(data.date);
 
     makeObservable(this, {
-      dateIso: observable,
-      setDate: action,
+      date: observable,
     });
   }
 
@@ -69,12 +69,16 @@ class Result {
     return this.data.water === "fifty";
   }
 
-  get date() {
-    return dayjs(this.dateIso);
-  }
-
-  setDate(date: string) {
-    this.dateIso = date;
+  readonly setDate = async (date: Dayjs) => {
+    const toSave = this.date
+      .year(date.year())
+      .month(date.month())
+      .date(date.date());
+    const { date: saved } = await setResultDate(this.id, toSave.toISOString());
+    runInAction(() => {
+      this.data.date = saved;
+      this.date = dayjs(saved);
+    });
   }
 
   get stageStep() {

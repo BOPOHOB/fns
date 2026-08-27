@@ -9,13 +9,14 @@ import { useResultsColumns, resultsTableScrollX } from '../results/useResultsCol
 
 import cn from './day.module.less';
 import { CommonTable } from '../../components/commonTable';
+import { ResultRow } from '../../model/resultRow';
 
 const Day = observer(() => {
   const day = useDay();
   const results = useResults();
   const columns = useResultsColumns('day');
 
-  const rows = results.results.filter((r) => r.date.isValid() && r.date.format('YYYY-MM-DD') === day).sort((a, b) => b.date.valueOf() - a.date.valueOf());
+  const rows = ResultRow.fromResults(results.results.filter((r) => r.date.isValid() && r.date.format('YYYY-MM-DD') === day).sort((a, b) => b.date.valueOf() - a.date.valueOf()));
 
   const titleDate = dayjs(day);
 

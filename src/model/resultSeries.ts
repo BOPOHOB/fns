@@ -9,6 +9,10 @@ class ResultSeries {
     this.#model = new WeakRef(model);
   }
 
+  get swimmer() {
+    return this.results.at(0).swimmer;
+  }
+
   get id() {
     return this.data.id;
   }

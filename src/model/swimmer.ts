@@ -3,6 +3,7 @@ import type { Sex, Swimmer as SwimmerJSON } from "../types/swimmer";
 import { action, computed, makeObservable, observable } from "mobx";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import { ResultRow } from "./resultRow";
 
 dayjs.extend(customParseFormat);
 
@@ -112,7 +113,7 @@ class Swimmer {
   }
 
   get results() {
-    return this.#model.deref().results.filter((result) => result.swimmerId === this.id);
+    return ResultRow.fromResults(this.#model.deref().results.filter((result) => result.swimmerId === this.id));
   }
 
   get row() {

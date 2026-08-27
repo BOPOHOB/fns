@@ -16,6 +16,7 @@ import {
 import cn from './equipment.module.less';
 import { useEffect, type FC } from "react";
 import type { WaterType } from "../../../types/result";
+import type { CheckboxProps } from "antd/lib/checkbox";
 
 type Equipment = {
   swimfin: boolean;
@@ -57,28 +58,28 @@ const EquipmentPicker: FC<{ water: WaterType, onChange: (eq: Equipment) => void 
   },
   [swimfin, fingerPaddle, handPaddle, pullBuoy, board, wetsuit, breakBelt, snorkel, monofin ]);
 
-  const onFingerPaddleChange = (e) => {
+  const onFingerPaddleChange: CheckboxProps["onChange"] = (e) => {
     if (e.target.checked && handPaddle) {
       setHandPaddle(false);
     }
     setFingerPaddle(e.target.checked);
   }
 
-  const onHandlePaddleChange = (e) => {
+  const onHandlePaddleChange: CheckboxProps["onChange"] = (e) => {
     if (e.target.checked && fingerPaddle) {
       setFingerPaddle(false);
     }
     setHandPaddle(e.target.checked);
   }
 
-  const onSwimfinChange = (e) => {
+  const onSwimfinChange: CheckboxProps["onChange"] = (e) => {
     if (e.target.checked && monofin) {
       setMonofin(false);
     }
     setSwimfin(e.target.checked)
   };
 
-  const onMonofinChange = (e) => {
+  const onMonofinChange: CheckboxProps["onChange"] = (e) => {
     if (e.target.checked && swimfin) {
       setSwimfin(false);
     }

@@ -52,7 +52,7 @@ const StagesMatrix: FC<{
     let isChanged = false;
     let row = -1;
     let col = -1;
-    for (let i = 0; i < next.length; ++i) {
+    for (let i = 0; i < next.length; ++i) if (next[i].length !== 0) {
       let isReady = results[i] !== null;
       for (let j = 0; j < next[i].length - 1; ++j) {
         if (next[i][j].result === null) {
@@ -67,7 +67,7 @@ const StagesMatrix: FC<{
           row = next[i].length - 1;
           next[i].at(-1).result = computed;
         }
-      } else if (next[i].length > 0 && next[i].at(-1).result !== null) {
+      } else if (next[i].at(-1).result !== null) {
         isChanged = true;
         col = i;
         row = next[i].length - 1;

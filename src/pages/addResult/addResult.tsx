@@ -282,7 +282,7 @@ const AddResult = () => {
   const warnMessage = (() => {
     if (repeat !== 1) {
       if (speed === null) {
-        return "Не задан темп серии";
+        return "Не задана скорость";
       }
       if (interval === null) {
         return "Не задан интервал серии";
@@ -357,7 +357,7 @@ const AddResult = () => {
             <div className={cn.tripletTitle}>
               <p>Интервал</p>
               <p>Режим</p>
-              <p>Пауза</p>
+              <p>Отдых</p>
             </div>
             <div className={cn.triplet}>
               <TimeInput
@@ -378,7 +378,7 @@ const AddResult = () => {
                 className={cn.field}
                 value={pause}
                 onChange={setPause}
-                placeholder="Пауза"
+                placeholder="Отдых"
                 disabled={repeat === 1}
               />
             </div>
@@ -407,10 +407,10 @@ const AddResult = () => {
         <Tooltip title={errorMessage ?? warnMessage}>
           <AsyncButton
             icon={errorMessage ? <CloseCircleOutlined /> : (warnMessage ? <WarningOutlined /> : undefined)}
-            color={warnMessage ? 'danger' : 'default'}
             type="primary"
             disabled={Boolean(errorMessage)}
             onClick={handleSave}
+            color={warnMessage ? "gold" : "primary"} variant="solid"
           >
             Сохранить
           </AsyncButton>

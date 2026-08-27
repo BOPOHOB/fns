@@ -2,7 +2,7 @@ import { Button, type CheckboxChangeEvent, type CheckboxProps } from "antd";
 import type { ButtonProps } from "antd/lib/button";
 import { useCallback, useState, type FC } from "react";
 
-const CheckboxButton: FC<Omit<ButtonProps, 'onClick' | 'type'> & {
+const CheckboxButton: FC<Omit<ButtonProps, 'onChange' | 'type'> & {
   defaultChecked?: boolean;
   checked?: boolean;
   checkedType?: ButtonProps["type"];

@@ -1,7 +1,11 @@
 import type { Results } from "./results";
 import type { Team as TeamJSON } from "../types/team";
-import { action, computed, makeObservable, observable } from "mobx";
+import { computed, makeObservable, observable, runInAction } from "mobx";
 import { formatSlots } from "../shared/slots";
+import {
+  setTeamMembers as putTeamMembers,
+  setTeamTrainer as putTeamTrainer,
+} from "../api/teams";
 
 class Team {
   readonly #model: WeakRef<Results>;
@@ -12,7 +16,6 @@ class Team {
     this.trainerId = data.trainerId;
     makeObservable(this, {
       trainerId: observable,
-      setTrainerId: action,
       trainer: computed,
       members: computed,
       slotsLabel: computed,
@@ -21,9 +24,26 @@ class Team {
     });
   }
 
-  setTrainerId(id: number | null) {
-    this.trainerId = id;
-  }
+  readonly setTrainer = async (trainerId: number | null) => {
+    const { trainerId: saved } = await putTeamTrainer(this.id, trainerId);
+    runInAction(() => {
+      this.trainerId = saved;
+    });
+  };
+
+  readonly setMembers = async (swimmerIds: number[]) => {
+    const { swimmerIds: saved } = await putTeamMembers(this.id, swimmerIds);
+    const selected = new Set(saved);
+    const model = this.#model.deref()!;
+    runInAction(() => {
+      for (const swimmer of model.swimmers) {
+        const without = swimmer.teamIds.filter((id) => id !== this.id);
+        swimmer.setTeamIds(
+          selected.has(swimmer.id) ? [...without, this.id] : without,
+        );
+      }
+    });
+  };
 
   get trainer() {
     const id = this.trainerId;
@@ -62,6 +82,10 @@ class Team {
 
   get name() {
     return this.data.name;
+  }
+
+  get key() {
+    return this.id;
   }
 
   get row() {

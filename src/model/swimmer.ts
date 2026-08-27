@@ -1,9 +1,14 @@
 import type { Results } from "./results";
 import type { Sex, Swimmer as SwimmerJSON } from "../types/swimmer";
-import { action, computed, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable, runInAction } from "mobx";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { ResultRow } from "./resultRow";
+import {
+  setSwimmerBirthDate as putSwimmerBirthDate,
+  setSwimmerName as putSwimmerName,
+  setSwimmerSex as putSwimmerSex,
+} from "../api/swimmers";
 
 dayjs.extend(customParseFormat);
 
@@ -27,9 +32,6 @@ class Swimmer {
       name: observable,
       sex: observable,
       setTeamIds: action,
-      setBirthDate: action,
-      setName: action,
-      setSex: action,
       bestSex: computed,
       bestGroup: computed,
       sexEmoji: computed,
@@ -44,17 +46,26 @@ class Swimmer {
     this.teamId = [...ids];
   }
 
-  setBirthDate(date: string | undefined) {
-    this.birthDate = date;
-  }
+  readonly setBirthDate = async (birthDate: string | null) => {
+    const { birthDate: saved } = await putSwimmerBirthDate(this.id, birthDate);
+    runInAction(() => {
+      this.birthDate = saved ?? undefined;
+    });
+  };
 
-  setName(name: string) {
-    this.name = name;
-  }
+  readonly setName = async (name: string) => {
+    const { name: saved } = await putSwimmerName(this.id, name);
+    runInAction(() => {
+      this.name = saved;
+    });
+  };
 
-  setSex(sex: Sex) {
-    this.sex = sex;
-  }
+  readonly setSex = async (sex: Sex) => {
+    const { sex: saved } = await putSwimmerSex(this.id, sex);
+    runInAction(() => {
+      this.sex = saved;
+    });
+  };
 
   get key() {
     return this.data.id;

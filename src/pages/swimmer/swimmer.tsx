@@ -39,8 +39,7 @@ const Swimmer = observer(() => {
   const onBirthDateChange = async (value: Dayjs | null) => {
     setSavingBirthDate(true);
     try {
-      await results.setSwimmerBirthDate(
-        swimmer.id,
+      await swimmer.setBirthDate(
         value ? value.format('YYYY-MM-DD') : null,
       );
     } finally {
@@ -62,7 +61,7 @@ const Swimmer = observer(() => {
           value={swimmer.name}
           debounceMs={NAME_SAVE_DEBOUNCE_MS}
           placeholder="Имя"
-          onChange={(name) => results.setSwimmerName(swimmer.id, name)}
+          onChange={(name) => swimmer.setName(name)}
         />
       ) : (
         <Typography.Title level={3}>{swimmer.name}</Typography.Title>
@@ -76,7 +75,7 @@ const Swimmer = observer(() => {
               checkedChildren="муж"
               unCheckedChildren="жен"
               onChange={(checked) =>
-                results.setSwimmerSex(swimmer.id, checked ? 'male' : 'female')
+                swimmer.setSex(checked ? 'male' : 'female')
               }
             />
           ) : null}

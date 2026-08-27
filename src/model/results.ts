@@ -5,9 +5,8 @@ import { ResultSeries } from './resultSeries';
 import { Team } from './team';
 import { createContext, useContext } from "react";
 import { getResults, submitResult } from "../api/results";
-import { submitSwimmer, setSwimmerBirthDate, setSwimmerName, setSwimmerSex, type CreateSwimmerBody } from "../api/swimmers";
-import { submitTeam, setTeamMembers, setTeamTrainer, deleteTeam, type CreateTeamBody } from "../api/teams";
-import type { Sex } from "../types/swimmer";
+import { submitSwimmer, type CreateSwimmerBody } from "../api/swimmers";
+import { submitTeam, deleteTeam, type CreateTeamBody } from "../api/teams";
 
 class Results {
   results = observable.array<Result>();
@@ -39,11 +38,6 @@ class Results {
       addResult: action,
       addSwimmer: action,
       addTeam: action,
-      setTeamMembers: action,
-      setTeamTrainer: action,
-      setSwimmerBirthDate: action,
-      setSwimmerName: action,
-      setSwimmerSex: action,
       deleteTeam: action,
       distances: computed,
       summaryTableRows: computed,
@@ -118,51 +112,6 @@ class Results {
       this.teams.push(new Team(team, this));
     });
     return team;
-  }
-
-  async setTeamMembers(teamId: number, swimmerIds: number[]) {
-    const { swimmerIds: saved } = await setTeamMembers(teamId, swimmerIds);
-    const selected = new Set(saved);
-    runInAction(() => {
-      for (const swimmer of this.swimmers) {
-        const without = swimmer.teamIds.filter((id) => id !== teamId);
-        swimmer.setTeamIds(
-          selected.has(swimmer.id) ? [...without, teamId] : without,
-        );
-      }
-    });
-  }
-
-  async setTeamTrainer(teamId: number, trainerId: number | null) {
-    const { trainerId: saved } = await setTeamTrainer(teamId, trainerId);
-    runInAction(() => {
-      const team = this.teams.find((t) => t.id === teamId);
-      team?.setTrainerId(saved);
-    });
-  }
-
-  async setSwimmerBirthDate(swimmerId: number, birthDate: string | null) {
-    const { birthDate: saved } = await setSwimmerBirthDate(swimmerId, birthDate);
-    runInAction(() => {
-      const swimmer = this.swimmers.find((s) => s.id === swimmerId);
-      swimmer?.setBirthDate(saved ?? undefined);
-    });
-  }
-
-  async setSwimmerName(swimmerId: number, name: string) {
-    const { name: saved } = await setSwimmerName(swimmerId, name);
-    runInAction(() => {
-      const swimmer = this.swimmers.find((s) => s.id === swimmerId);
-      swimmer?.setName(saved);
-    });
-  }
-
-  async setSwimmerSex(swimmerId: number, sex: Sex) {
-    const { sex: saved } = await setSwimmerSex(swimmerId, sex);
-    runInAction(() => {
-      const swimmer = this.swimmers.find((s) => s.id === swimmerId);
-      swimmer?.setSex(saved);
-    });
   }
 
   async deleteTeam(teamId: number) {

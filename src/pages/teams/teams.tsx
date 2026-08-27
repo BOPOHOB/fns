@@ -3,33 +3,24 @@ import { Button, Popconfirm, Spin, Tooltip } from 'antd';
 import { useNavigate } from 'react-router';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { useResults } from '../../model/results';
+import type { Team } from '../../model/team';
 import type { ColumnsType } from 'antd/es/table';
 import { AsyncSelect } from '../../components/asyncSelect';
 
 import cn from './teams.module.less';
 import { CommonTable } from '../../components/commonTable';
 
-type Row = {
-  key: number;
-  id: number;
-  name: string;
-  trainerId: number | null;
-  slots: string[];
-  memberIds: number[];
-};
-
 const Teams = observer(() => {
   const results = useResults();
   const navigate = useNavigate();
-  const rows = results.teams.map((t) => t.row);
 
-  const columns: ColumnsType<Row> = [
+  const columns: ColumnsType<Team> = [
     {
       title: 'Тренер',
       dataIndex: 'trainerId',
       key: 'trainer',
       width: 220,
-      render: (trainerId: number | null, row) => (
+      render: (trainerId: number | null, team) => (
         <AsyncSelect<number>
           className={cn.trainer}
           allowClear
@@ -38,18 +29,17 @@ const Teams = observer(() => {
           placeholder="Тренер"
           value={trainerId ?? undefined}
           options={results.trainersSelect}
-          onChange={(id) => results.setTeamTrainer(row.id, id ?? null)}
+          onChange={(id) => team.setTrainer(id ?? null)}
         />
       ),
     },
     {
       title: 'Слоты',
-      dataIndex: 'slots',
       key: 'slots',
-      render: (slots: string[]) =>
-        slots.length ? (
+      render: (_, team) =>
+        team.slotsLabel.length ? (
           <ul className={cn.slots}>
-            {slots.map((s) => (
+            {team.slotsLabel.map((s) => (
               <li key={s}>{s}</li>
             ))}
           </ul>
@@ -59,10 +49,9 @@ const Teams = observer(() => {
     },
     {
       title: 'Участники',
-      dataIndex: 'memberIds',
       key: 'members',
       width: 320,
-      render: (memberIds: number[], row) => (
+      render: (_, team) => (
         <AsyncSelect<number[]>
           className={cn.members}
           mode="multiple"
@@ -70,9 +59,9 @@ const Teams = observer(() => {
           showSearch
           optionFilterProp="label"
           placeholder="Пловцы"
-          value={memberIds}
+          value={team.members.map((s) => s.id)}
           options={results.swimmersSelect}
-          onChange={(ids) => results.setTeamMembers(row.id, ids ?? [])}
+          onChange={(ids) => team.setMembers(ids ?? [])}
         />
       ),
     },
@@ -80,7 +69,7 @@ const Teams = observer(() => {
       title: '',
       key: 'actions',
       width: 56,
-      render: (_, row) => (
+      render: (_, team) => (
         <Tooltip title={"После удаления информация о пловцах не будет потеряна, они просто \"выйдут\" из удалённой группы"}>
           <Popconfirm
             title="Не случайно нажал?"
@@ -88,7 +77,7 @@ const Teams = observer(() => {
             cancelText="Отмена"
             placement='bottom'
             okButtonProps={{ danger: true }}
-            onConfirm={() => results.deleteTeam(row.id)}
+            onConfirm={() => results.deleteTeam(team.id)}
           >
             <Button type="text" danger icon={<DeleteOutlined />} />
           </Popconfirm>
@@ -106,7 +95,7 @@ const Teams = observer(() => {
         </Button>
       </div>
       <Spin spinning={results.isLoading}>
-        <CommonTable columns={columns} dataSource={rows} />
+        <CommonTable columns={columns} dataSource={results.teams} />
       </Spin>
     </div>
   );

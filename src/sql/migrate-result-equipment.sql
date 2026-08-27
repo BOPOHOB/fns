@@ -9,3 +9,6 @@ ALTER TABLE result ADD COLUMN break_belt INTEGER NOT NULL DEFAULT 0 CHECK (break
 ALTER TABLE result ADD COLUMN snorkel INTEGER NOT NULL DEFAULT 0 CHECK (snorkel IN (0, 1));
 ALTER TABLE result ADD COLUMN wetsuit INTEGER NOT NULL DEFAULT 0 CHECK (wetsuit IN (0, 1));
 ALTER TABLE result ADD COLUMN monofin INTEGER NOT NULL DEFAULT 0 CHECK (monofin IN (0, 1));
+ALTER TABLE result ADD COLUMN stroke TEXT DEFAULT NULL CHECK (stroke IS NULL OR stroke IN (
+  'butterfly', 'backstroke', 'breaststroke', 'freestyle', 'medley'
+));

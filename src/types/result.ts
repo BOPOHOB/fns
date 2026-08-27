@@ -19,6 +19,7 @@ type DistanceName =
 type ResultCondition = 'competition' | 'test' | 'workout';
 // тип заплыва - открытая вода/25м бассейн или 50м бассейн
 type WaterType = 'quarter' | 'fifty' | 'open';
+type Stroke = 'butterfly' | 'backstroke' | 'breaststroke' | 'freestyle' | 'medley';
 
 type Stages = Array<{
   result: number;
@@ -38,6 +39,7 @@ type Result = {
   date: string;
   type: ResultCondition;
   water: WaterType;
+  stroke: Stroke | null;
   stages: Stages | null;
   notes: string;
   swimfin: boolean;
@@ -51,4 +53,4 @@ type Result = {
   monofin: boolean;
 };
 
-export type { DistanceName, ResultCondition, WaterType, Result, Stages };
+export type { DistanceName, ResultCondition, WaterType, Stroke, Result, Stages };

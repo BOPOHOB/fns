@@ -1,6 +1,6 @@
 import type { PublicSwimmer } from '../types/swimmer.ts';
 import type { Team } from '../types/team.ts';
-import type { Result, ResultCondition, WaterType } from '../types/result.ts';
+import type { Result, ResultCondition, Stroke, WaterType } from '../types/result.ts';
 import type { ResultSeries } from '../types/resultSeries.ts';
 
 export type SwimmerRow = {
@@ -31,6 +31,7 @@ export type ResultRow = {
   notes: string;
   series_id: number | null;
   water: string;
+  stroke: string | null;
   swimfin: number;
   finger_paddle: number;
   hand_paddle: number;
@@ -98,6 +99,7 @@ export function mapResult(row: ResultRow): Result {
     date: row.date,
     type: row.type as ResultCondition,
     water: row.water as WaterType,
+    stroke: (row.stroke as Stroke | null) ?? null,
     stages,
     notes: row.notes,
     swimfin: row.swimfin !== 0,

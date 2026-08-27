@@ -3,22 +3,37 @@ import type { Db } from '../db.ts';
 import type { AuthConfig } from '../auth/config.ts';
 import { resolveNonSwimmerUser } from '../auth/session.ts';
 import { mapResult, mapSeries, type ResultRow, type SeriesRow } from '../mappers.ts';
-import type { Result, ResultCondition, Stages, WaterType } from '../../types/result.ts';
+import type { Result, ResultCondition, Stages, Stroke, WaterType } from '../../types/result.ts';
 import type { ResultSeries } from '../../types/resultSeries.ts';
 import { ALLOWED_DISTANCES } from "@shared/distances.ts";
 
 const RESULT_COLUMNS = `
-  id, swimmer_id, result, distance, date, type, stages, notes, series_id, water,
+  id, swimmer_id, result, distance, date, type, stages, notes, series_id, water, stroke,
   swimfin, finger_paddle, hand_paddle, pull_buoy, board, break_belt, snorkel, wetsuit, monofin
 `;
 
 const ALLOWED_TYPES = new Set<ResultCondition>(['competition', 'test', 'workout']);
 const ALLOWED_WATER = new Set<WaterType>(['quarter', 'fifty', 'open']);
+const ALLOWED_STROKES = new Set<Stroke>([
+  'butterfly',
+  'backstroke',
+  'breaststroke',
+  'freestyle',
+  'medley',
+]);
 
 function parseBoolean(value: unknown, field: string): boolean | string {
   if (value === undefined || value === null) return false;
   if (typeof value !== 'boolean') return `Invalid ${field}`;
   return value;
+}
+
+function parseStroke(value: unknown): Stroke | null | 'Invalid stroke' {
+  if (value === undefined || value === null || value === '') return null;
+  if (typeof value !== 'string' || !ALLOWED_STROKES.has(value as Stroke)) {
+    return 'Invalid stroke';
+  }
+  return value as Stroke;
 }
 
 type EquipmentFields = Pick<
@@ -124,6 +139,12 @@ function parseCreateSeriesBody(body: unknown): CreateSeriesBody | string {
     return 'Invalid water';
   }
 
+  const strokeResult = parseStroke(raw.stroke);
+  if (strokeResult === 'Invalid stroke') {
+    return strokeResult;
+  }
+  const stroke = strokeResult;
+
   if (typeof raw.notes !== 'string') {
     return 'Invalid notes';
   }
@@ -165,6 +186,7 @@ function parseCreateSeriesBody(body: unknown): CreateSeriesBody | string {
     date: raw.date.trim(),
     type: raw.type as ResultCondition,
     water: raw.water as WaterType,
+    stroke,
     notes: raw.notes,
     speed,
     interval,
@@ -225,9 +247,9 @@ export function seriesRoutes(db: Db, authConfig: AuthConfig | null) {
 
     const insertResult = db.prepare(`
       INSERT INTO result (
-        swimmer_id, result, distance, date, type, stages, notes, series_id, water,
+        swimmer_id, result, distance, date, type, stages, notes, series_id, water, stroke,
         swimfin, finger_paddle, hand_paddle, pull_buoy, board, break_belt, snorkel, wetsuit, monofin
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     const insertSeries = db.prepare(`
       INSERT INTO result_series (date, regime, speed, repetitions)
@@ -252,6 +274,7 @@ export function seriesRoutes(db: Db, authConfig: AuthConfig | null) {
           JSON.stringify(parsed.stages[i]),
           parsed.notes,
           parsed.water,
+          parsed.stroke,
           parsed.swimfin ? 1 : 0,
           parsed.fingerPaddle ? 1 : 0,
           parsed.handPaddle ? 1 : 0,

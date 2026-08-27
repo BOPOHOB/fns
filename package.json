@@ -17,6 +17,7 @@
     "db:push": "scp data.db bopohob@191.215.39.234:/opt/feelandswim/data.db",
     "db:migrate": "bash scripts/db-migrate-equipment.sh",
     "icons:trace": "bash scripts/trace-icons.sh",
+    "icons:trace:stroke": "bash scripts/trace-stroke-icons.sh",
     "backend": "deno task backend",
     "agent": "agent --resume=6ace765c-5efd-409e-954f-c211ddcb2177"
   },

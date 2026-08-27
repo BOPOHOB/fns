@@ -3,16 +3,23 @@ import type { Db } from '../db.ts';
 import type { AuthConfig } from '../auth/config.ts';
 import { resolveNonSwimmerUser } from '../auth/session.ts';
 import { mapResult, type ResultRow } from '../mappers.ts';
-import type { Result, ResultCondition, WaterType } from '../../types/result.ts';
+import type { Result, ResultCondition, Stroke, WaterType } from '../../types/result.ts';
 import { ALLOWED_DISTANCES } from "@shared/distances.ts";
 
 const RESULT_COLUMNS = `
-  id, swimmer_id, result, distance, date, type, stages, notes, series_id, water,
+  id, swimmer_id, result, distance, date, type, stages, notes, series_id, water, stroke,
   swimfin, finger_paddle, hand_paddle, pull_buoy, board, break_belt, snorkel, wetsuit, monofin
 `;
 
 const ALLOWED_TYPES = new Set<ResultCondition>(['competition', 'test', 'workout']);
 const ALLOWED_WATER = new Set<WaterType>(['quarter', 'fifty', 'open']);
+const ALLOWED_STROKES = new Set<Stroke>([
+  'butterfly',
+  'backstroke',
+  'breaststroke',
+  'freestyle',
+  'medley',
+]);
 
 type CreateResultBody = Omit<Result, 'id'>;
 
@@ -20,6 +27,14 @@ function parseBoolean(value: unknown, field: string): boolean | string {
   if (value === undefined || value === null) return false;
   if (typeof value !== 'boolean') return `Invalid ${field}`;
   return value;
+}
+
+function parseStroke(value: unknown): Stroke | null | 'Invalid stroke' {
+  if (value === undefined || value === null || value === '') return null;
+  if (typeof value !== 'string' || !ALLOWED_STROKES.has(value as Stroke)) {
+    return 'Invalid stroke';
+  }
+  return value as Stroke;
 }
 
 type EquipmentFields = Pick<
@@ -101,6 +116,12 @@ function parseCreateBody(body: unknown): CreateResultBody | string {
     return 'Invalid water';
   }
 
+  const strokeResult = parseStroke(raw.stroke);
+  if (strokeResult === 'Invalid stroke') {
+    return strokeResult;
+  }
+  const stroke = strokeResult;
+
   if (typeof raw.notes !== 'string') {
     return 'Invalid notes';
   }
@@ -144,6 +165,7 @@ function parseCreateBody(body: unknown): CreateResultBody | string {
     date: raw.date.trim(),
     type: raw.type as ResultCondition,
     water: raw.water as WaterType,
+    stroke,
     stages,
     notes: raw.notes,
     ...equipment,
@@ -250,9 +272,9 @@ export function resultsRoutes(db: Db, authConfig: AuthConfig | null) {
     try {
       const info = db.prepare(`
         INSERT INTO result (
-          swimmer_id, result, distance, date, type, stages, notes, series_id, water,
+          swimmer_id, result, distance, date, type, stages, notes, series_id, water, stroke,
           swimfin, finger_paddle, hand_paddle, pull_buoy, board, break_belt, snorkel, wetsuit, monofin
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         parsed.swimmerId,
         parsed.result,
@@ -263,6 +285,7 @@ export function resultsRoutes(db: Db, authConfig: AuthConfig | null) {
         parsed.notes,
         parsed.seriesId ?? null,
         parsed.water,
+        parsed.stroke,
         parsed.swimfin ? 1 : 0,
         parsed.fingerPaddle ? 1 : 0,
         parsed.handPaddle ? 1 : 0,

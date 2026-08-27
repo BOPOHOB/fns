@@ -12,6 +12,9 @@ CREATE TABLE IF NOT EXISTS "result" (
   "notes" TEXT NOT NULL DEFAULT '',
   "series_id" INTEGER,
   "water" TEXT NOT NULL CHECK ("water" IN ('quarter', 'fifty', 'open')),
+  "stroke" TEXT DEFAULT NULL CHECK ("stroke" IS NULL OR "stroke" IN (
+    'butterfly', 'backstroke', 'breaststroke', 'freestyle', 'medley'
+  )),
   "swimfin" INTEGER NOT NULL DEFAULT 0 CHECK ("swimfin" IN (0, 1)),
   "finger_paddle" INTEGER NOT NULL DEFAULT 0 CHECK ("finger_paddle" IN (0, 1)),
   "hand_paddle" INTEGER NOT NULL DEFAULT 0 CHECK ("hand_paddle" IN (0, 1)),

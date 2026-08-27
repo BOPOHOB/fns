@@ -6,7 +6,7 @@ import { getOrCreatePng, isOgCacheEnabled } from "./render.ts";
 import { STAGE_CHUNK_LENGTH } from "../../shared/stagesLayout.ts";
 
 const RESULT_SELECT = `
-  SELECT id, swimmer_id, result, distance, date, type, stages, notes, series_id, water,
+  SELECT id, swimmer_id, result, distance, date, type, stages, notes, series_id, water, stroke,
     swimfin, finger_paddle, hand_paddle, pull_buoy, board, break_belt, snorkel, wetsuit, monofin
   FROM result
 `;

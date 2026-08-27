@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Button, DatePicker, Radio, Typography, Space, Alert, InputNumber, Tooltip, Checkbox, type CheckboxProps } from 'antd';
 import dayjs, { type Dayjs } from 'dayjs';
 import { Link, useNavigate } from 'react-router';
-import type { ResultCondition, WaterType } from '../../types/result';
+import type { ResultCondition, Stroke, WaterType } from '../../types/result';
 
 import cn from './addResult.module.less';
 import { useSwimmer } from '../../router/swimmerOutline';
@@ -33,17 +33,33 @@ import {
   SwimfinIcon,
   WetsuitIcon,
 } from './equipment/icons';
+import {
+  BackstrokeIcon,
+  BreaststrokeIcon,
+  ButterflyIcon,
+  FreestyleIcon,
+  MedleyIcon,
+} from './stroke/icons';
+import type { CheckboxOptionType } from 'antd/lib/checkbox';
 
-export const RESULT_CONDITION_OPTIONS: { value: ResultCondition; label: string }[] = [
+export const RESULT_CONDITION_OPTIONS: CheckboxOptionType<'competition' | 'test' | 'workout'>[] = [
   { value: 'competition', label: 'Соревнования' },
-  { value: 'test', label: 'Контрольный заплыв' },
+  { value: 'test', label: 'Контрольный заплыв', style: { flex: 1.5 } },
   { value: 'workout', label: 'Тренировка' },
 ];
 
-export const RESULT_WATER_OPTIONS: { value: WaterType; label: string }[] = [
+export const RESULT_WATER_OPTIONS: CheckboxOptionType<WaterType>[] = [
   { value: 'quarter', label: 'Четвертак' },
   { value: 'fifty', label: 'Полтинник' },
   { value: 'open', label: 'Открытая вода' },
+];
+
+export const RESULT_STROKE_OPTIONS: { value: Stroke; label: string; icon: typeof ButterflyIcon }[] = [
+  { value: 'butterfly', label: 'Баттерфляй', icon: ButterflyIcon },
+  { value: 'backstroke', label: 'Спина', icon: BackstrokeIcon },
+  { value: 'breaststroke', label: 'Брасс', icon: BreaststrokeIcon },
+  { value: 'freestyle', label: 'Кроль', icon: FreestyleIcon },
+  { value: 'medley', label: 'Комплекс', icon: MedleyIcon },
 ];
 
 const OPEN_MIN_DISTANCE = 500;
@@ -73,6 +89,7 @@ const AddResult = () => {
     interval, setInterval
   } = useSeriesController();
   const [condition, setCondition] = useStorageState<ResultCondition>('workout', 'addResult.condition');
+  const [stroke, setStroke] = useStorageState<Stroke>('freestyle', 'addResult.stroke');
   const [notes, setNotes] = useState('');
   const [swimfin, setSwimfin] = useStorageState(false, 'addResult.swimfin');
   const [fingerPaddle, setFingerPaddle] = useStorageState(false, 'addResult.fingerPaddle');
@@ -201,6 +218,7 @@ const AddResult = () => {
       result,
       water,
       type: condition,
+      stroke,
       date: date.toISOString(),
       notes,
       stages,
@@ -369,6 +387,22 @@ const AddResult = () => {
         onChange={(e) => setCondition(e.target.value)}
         options={RESULT_CONDITION_OPTIONS}
       />
+      <Radio.Group
+        className={cn.field}
+        optionType="button"
+        value={stroke}
+        onChange={(e) => setStroke(e.target.value)}
+        options={RESULT_STROKE_OPTIONS.map(({ value, label, icon: Icon }) => ({
+          value,
+          label: (
+            <Tooltip title={label}>
+              <span className={cn.strokeIcon}>
+                <Icon />
+              </span>
+            </Tooltip>
+          ),
+        }))}
+      />
       {water !== 'open' && (
         <div className={cn.equipment}>
           <Tooltip title="Ласты">
@@ -410,8 +444,8 @@ const AddResult = () => {
         {repeat > 1 && (
           <div className={cn.tripletContainer}>
             <div className={cn.tripletTitle}>
+              <p>Интервал</p>
               <p>Режим</p>
-              <p>Темп</p>
               <p>Пауза</p>
             </div>
             <div className={cn.triplet}>
@@ -426,7 +460,7 @@ const AddResult = () => {
                 className={cn.field}
                 value={speed}
                 onChange={setSpeed}
-                placeholder="Темп"
+                placeholder="Режим"
                 disabled={repeat === 1}
               />
               <TimeInput

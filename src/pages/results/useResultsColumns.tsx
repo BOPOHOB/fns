@@ -19,6 +19,8 @@ import cn from './useResultsColumns.module.less'
 import { distanceName } from '../../shared/format';
 import { EquipmentView } from '../../components/equipment/equipmentView';
 import { EquipmentPicker } from '../../components/equipment/equipmentPicker';
+import { StrokeSelect } from '../../components/stroke/strokeSelect';
+import { StrokeView } from '../../components/stroke/strokeView';
 
 const CONDITION_LABEL: Record<ResultCondition | 'open', string> = {
   competition: 'Соревнования',
@@ -93,6 +95,7 @@ const ResultEquipmentCell: FC<{ row: ResultRow }> = observer(({ row }) => {
 
 function useResultsColumns(kind: 'swimmer' | 'day'): ColumnsType<ResultRow> {
   const navigate = useNavigate();
+  const session = useSession();
   return [
     ...c(kind === 'day', {
       title: 'Пловец',
@@ -105,10 +108,14 @@ function useResultsColumns(kind: 'swimmer' | 'day'): ColumnsType<ResultRow> {
     {
       title: 'Результат',
       dataIndex: 'time',
-      width: 80,
+      width: 140,
       render: (_: never, result: ResultRow) => (
-        <div>
-          {result.isSeries && (<p style={{ textAlign: 'center'}}>{result.results.length}x{distanceName(result.distance, true)}</p>)}
+        <div className={cn.resultCell}>
+          {session.isTrainer && <StrokeSelect onChange={result.updateStroke} value={result.stroke} />}
+          <div className={cn.resultStroke}>
+            {!session.isTrainer && <StrokeView className={cn.stroke} stroke={result.stroke} />}
+            {result.isSeries && (<p className={cn.distanceLabel}>{result.results.length}x{distanceName(result.distance, true)}</p>)}
+          </div>
           <ResultBadge result={result} />
         </div>
       ),

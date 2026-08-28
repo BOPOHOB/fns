@@ -1,6 +1,6 @@
 import type { StagesRawInput } from "../pages/addResult/stages";
 import type { Equipment } from "../types/equipment";
-import type { Result } from "../types/result";
+import type { Result, Stroke } from "../types/result";
 import type { ResultSeries } from "../types/resultSeries";
 import type { Swimmer } from "../types/swimmer";
 import type { Team } from "../types/team";
@@ -55,4 +55,10 @@ const setResultEquipment = (resultId: number, data: Equipment) =>
     body: JSON.stringify(data),
   });
 
-export { getResults, submitResult, setResultDate, setResultEquipment };
+const setResultStroke = (resultId: number, stroke: Stroke | null) =>
+  apiFetch<{ stroke: Stroke | null }>(`/api/results/${resultId}/stroke`, {
+    method: 'PUT',
+    body: JSON.stringify({ stroke }),
+  });
+
+export { getResults, submitResult, setResultDate, setResultEquipment, setResultStroke };

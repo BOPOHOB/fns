@@ -2,6 +2,7 @@ import type { Dayjs } from "dayjs";
 import { Result } from "./result";
 import { ResultSeries } from "./resultSeries";
 import type { Equipment } from "../types/equipment";
+import type { Stroke } from "../types/result";
 
 class ResultRow {
   constructor(private readonly data: Result | ResultSeries) {}
@@ -16,6 +17,14 @@ class ResultRow {
 
   get swimmer() {
     return this.data.swimmer;
+  }
+
+  get stroke(): Stroke | null {
+    return this.results.at(0).stroke;
+  }
+
+  readonly updateStroke = (stroke: Stroke) => {
+    return Promise.all(this.results.map((r) => r.updateStroke(stroke)));
   }
 
   get equipment(): Equipment {

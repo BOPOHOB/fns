@@ -1,0 +1,50 @@
+.strokeIcon {
+  display: inline-flex;
+  width: 36px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+}
+
+.strokeView {
+  height: 24px;
+  width: 24px;
+  padding: 2px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.strokeSelectOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.strokeSelectIcon {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.strokeSelect {
+  min-width: 56px;
+
+  :global(.ant-select-selection-item) {
+    display: flex !important;
+    align-items: center;
+  }
+}

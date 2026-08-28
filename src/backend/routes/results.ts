@@ -411,6 +411,46 @@ export function resultsRoutes(db: Db, authConfig: AuthConfig | null) {
     }
   });
 
+  app.put('/:id/stroke', async (c) => {
+    const auth = await resolveNonSwimmerUser(c, authConfig, db);
+    if (!auth.ok) {
+      return c.json({ error: auth.error }, auth.status);
+    }
+
+    const id = Number(c.req.param('id'));
+    if (!Number.isInteger(id) || id < 1) {
+      return c.json({ error: 'Invalid id' }, 400);
+    }
+
+    const existing = db
+      .prepare(`SELECT id FROM result WHERE id = ?`)
+      .get(id) as { id: number } | undefined;
+    if (!existing) return c.json({ error: 'Not found' }, 404);
+
+    let body: unknown;
+    try {
+      body = await c.req.json();
+    } catch {
+      return c.json({ error: 'Invalid JSON body' }, 400);
+    }
+
+    if (typeof body !== 'object' || body === null) {
+      return c.json({ error: 'Invalid JSON body' }, 400);
+    }
+
+    const strokeResult = parseStroke((body as Record<string, unknown>).stroke);
+    if (strokeResult === 'Invalid stroke') {
+      return c.json({ error: strokeResult }, 400);
+    }
+
+    try {
+      db.prepare(`UPDATE result SET stroke = ? WHERE id = ?`).run(strokeResult, id);
+      return c.json({ stroke: strokeResult });
+    } catch (e) {
+      return c.json({ error: e instanceof Error ? e.message : 'Update failed' }, 500);
+    }
+  });
+
   app.get('/:id', (c) => {
     const id = Number(c.req.param('id'));
     if (!Number.isInteger(id) || id < 1) return c.json({ error: 'Invalid id' }, 400);

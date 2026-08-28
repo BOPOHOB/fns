@@ -22,7 +22,7 @@ import { normalizeSpeed, isSpeedDistributed, stagesSpeed, speedOutOfRange } from
 import clsx from "clsx";
 import { useLatest } from '../../utils/useLatest';
 import type { CheckboxOptionType } from 'antd/lib/checkbox';
-import { StrokeRadio } from './stroke/stroke';
+import { StrokePicker } from '../../components/stroke/strokePicker';
 import { EquipmentPicker, useEquipmentState } from '../../components/equipment/equipmentPicker';
 
 export const RESULT_CONDITION_OPTIONS: CheckboxOptionType<'competition' | 'test' | 'workout'>[] = [
@@ -335,7 +335,7 @@ const AddResult = () => {
         onChange={(e) => setCondition(e.target.value)}
         options={RESULT_CONDITION_OPTIONS}
       />
-      <StrokeRadio
+      <StrokePicker
         className={cn.field}
         value={stroke}
         onChange={setStroke}

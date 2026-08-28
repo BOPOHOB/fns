@@ -1,9 +1,9 @@
 import dayjs, { Dayjs } from "dayjs";
 import { computed, makeObservable, observable, runInAction } from "mobx";
-import type { ResultCondition, Result as ResultJSON } from "../types/result";
+import type { ResultCondition, Result as ResultJSON, Stroke } from "../types/result";
 import type { Results } from "./results";
 import { distanceName } from "../pages/addResult/distanceSelect";
-import { setResultDate, setResultEquipment } from "../api/results";
+import { setResultDate, setResultEquipment, setResultStroke } from "../api/results";
 import type { Equipment } from "../types/equipment";
 
 class Result {
@@ -18,6 +18,7 @@ class Result {
       data: observable,
       date: observable,
       equipment: computed,
+      stroke: computed,
     });
   }
 
@@ -35,6 +36,18 @@ class Result {
 
   get result() {
     return this.data.result;
+  }
+
+  get stroke(): Stroke | null {
+    return this.data.stroke;
+  }
+
+  readonly updateStroke = async (stroke: Stroke) => {
+    if (this.stroke === stroke) return;
+    const { stroke: saved } = await setResultStroke(this.id, stroke);
+    runInAction(() => {
+      this.data.stroke = saved;
+    });
   }
 
   get equipment(): Equipment {

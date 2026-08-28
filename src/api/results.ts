@@ -1,5 +1,6 @@
 import type { StagesRawInput } from "../pages/addResult/stages";
-import type { Result, Stages } from "../types/result";
+import type { Equipment } from "../types/equipment";
+import type { Result } from "../types/result";
 import type { ResultSeries } from "../types/resultSeries";
 import type { Swimmer } from "../types/swimmer";
 import type { Team } from "../types/team";
@@ -48,4 +49,10 @@ const setResultDate = (resultId: number, date: string) =>
     body: JSON.stringify({ date }),
   });
 
-export { getResults, submitResult, setResultDate };
+const setResultEquipment = (resultId: number, data: Equipment) =>
+  apiFetch<Equipment>(`/api/results/${resultId}/equipment`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+
+export { getResults, submitResult, setResultDate, setResultEquipment };

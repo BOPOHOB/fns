@@ -1,6 +1,7 @@
 import type { Dayjs } from "dayjs";
 import { Result } from "./result";
 import { ResultSeries } from "./resultSeries";
+import type { Equipment } from "../types/equipment";
 
 class ResultRow {
   constructor(private readonly data: Result | ResultSeries) {}
@@ -15,6 +16,14 @@ class ResultRow {
 
   get swimmer() {
     return this.data.swimmer;
+  }
+
+  get equipment(): Equipment {
+    return this.results.at(0).equipment;
+  }
+
+  readonly updateEquipment = (eq: Equipment) => {
+    return Promise.all(this.results.map(r => r.updateEquipment(eq)));
   }
 
   get results(): Result[] {

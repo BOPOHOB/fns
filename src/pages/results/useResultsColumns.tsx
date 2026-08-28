@@ -1,8 +1,8 @@
 import { useState, type FC } from 'react';
 import type { ColumnsType } from 'antd/es/table';
-import { Button, DatePicker, Space, notification } from 'antd';
-import { ShareAltOutlined } from '@ant-design/icons';
-import { Link } from 'react-router';
+import { Button, DatePicker, Space, Tooltip, notification } from 'antd';
+import { ExportOutlined, FileImageOutlined, ShareAltOutlined } from '@ant-design/icons';
+import { Link, useNavigate } from 'react-router';
 import { observer } from 'mobx-react';
 import dayjs, { type Dayjs } from 'dayjs';
 import type { ResultCondition, WaterType } from '../../types/result';
@@ -16,7 +16,9 @@ import { useSession } from '../../model/session';
 import type { ResultRow } from '../../model/resultRow';
 
 import cn from './useResultsColumns.module.less'
-import { distanceName, stringifySeconds } from '../../shared/format';
+import { distanceName } from '../../shared/format';
+import { EquipmentView } from '../../components/equipment/equipmentView';
+import { EquipmentPicker } from '../../components/equipment/equipmentPicker';
 
 const CONDITION_LABEL: Record<ResultCondition | 'open', string> = {
   competition: 'Соревнования',
@@ -82,7 +84,15 @@ const ResultDateCell: FC<{ result: ResultRow }> = observer(({ result }) => {
   );
 });
 
+const ResultEquipmentCell: FC<{ row: ResultRow }> = observer(({ row }) => {
+  const session = useSession();
+  return session.isTrainer
+    ? <EquipmentPicker onChange={row.updateEquipment} value={row.equipment} />
+    : <EquipmentView {...row.equipment} />;
+});
+
 function useResultsColumns(kind: 'swimmer' | 'day'): ColumnsType<ResultRow> {
+  const navigate = useNavigate();
   return [
     ...c(kind === 'day', {
       title: 'Пловец',
@@ -126,7 +136,12 @@ function useResultsColumns(kind: 'swimmer' | 'day'): ColumnsType<ResultRow> {
       title: 'Условия',
       dataIndex: 'condition' as const,
       width: 140,
-      render: (v: ResultCondition | 'open') => CONDITION_LABEL[v],
+      render: (v: ResultCondition | 'open', row) => (
+        <div className={cn.kind}>
+          <p>{CONDITION_LABEL[v]}</p>
+          <div><ResultEquipmentCell row={row} /></div>
+        </div>
+      ),
     },
     {
       title: 'Поделиться',
@@ -134,12 +149,24 @@ function useResultsColumns(kind: 'swimmer' | 'day'): ColumnsType<ResultRow> {
       width: 180,
       render: (_: never, result: ResultRow) => (
         <Space size={0}>
-          <Button
-            type="link"
-            icon={<ShareAltOutlined />}
-            onClick={() => void copyResultLink(result.id)}
-          />
-          <Link to={resultPagePath(result.id)}>Перейти</Link>
+          <Tooltip title="Скопировать ссылку">
+            <Button
+              icon={<ShareAltOutlined />}
+              onClick={() => void copyResultLink(result.id)}
+            />
+          </Tooltip>
+          <Tooltip title="Скопировать в виде картинки">
+            <Button
+              icon={<FileImageOutlined />}
+              onClick={() => void copyResultLink(result.id)}
+            />
+          </Tooltip>
+          <Tooltip title="Открыть отдельно">
+            <Button
+              icon={<ExportOutlined />} 
+              onClick={() => navigate(resultPageUrl(result.id))}
+            />
+          </Tooltip>
         </Space>
       ),
     },

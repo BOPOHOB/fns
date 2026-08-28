@@ -22,8 +22,8 @@ import { normalizeSpeed, isSpeedDistributed, stagesSpeed, speedOutOfRange } from
 import clsx from "clsx";
 import { useLatest } from '../../utils/useLatest';
 import type { CheckboxOptionType } from 'antd/lib/checkbox';
-import { EquipmentPicker, type Equipment } from './equipment/equipment';
 import { StrokeRadio } from './stroke/stroke';
+import { EquipmentPicker, useEquipmentState } from '../../components/equipment/equipmentPicker';
 
 export const RESULT_CONDITION_OPTIONS: CheckboxOptionType<'competition' | 'test' | 'workout'>[] = [
   { value: 'competition', label: 'Соревнования' },
@@ -71,7 +71,7 @@ const AddResult = () => {
   const [autoMinute, setAutoMinute] = useStorageState<0 | 1 | 2>(0, 'addResult.lessTwo');
   const [oneMin, setOneMin] = useState<boolean>(autoMinute === 1);
   const [twoMin, setTwoMin] = useState<boolean>(autoMinute === 2);
-  const [equipment, setEquipment] = useState<Equipment>();
+  const [equipment, setEquipment] = useEquipmentState();
   const oneMinHolder: CheckboxProps["onChange"] = (e) => {
     const checked = e.target.checked;
     setOneMin(checked);
@@ -340,11 +340,7 @@ const AddResult = () => {
         value={stroke}
         onChange={setStroke}
       />
-      {water !== 'open' && (
-        <div className={cn.equipment}>
-          <EquipmentPicker water={water} onChange={setEquipment} />
-        </div>
-      )}
+      <EquipmentPicker className={cn.equipment} onChange={setEquipment} value={equipment} />
       <div className={cn.repeatRow}>
         {water !== 'open' && (
           <div className={cn.row}>

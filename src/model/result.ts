@@ -1,20 +1,23 @@
 import dayjs, { Dayjs } from "dayjs";
-import { makeObservable, observable, runInAction } from "mobx";
+import { computed, makeObservable, observable, runInAction } from "mobx";
 import type { ResultCondition, Result as ResultJSON } from "../types/result";
 import type { Results } from "./results";
 import { distanceName } from "../pages/addResult/distanceSelect";
-import { setResultDate } from "../api/results";
+import { setResultDate, setResultEquipment } from "../api/results";
+import type { Equipment } from "../types/equipment";
 
 class Result {
   readonly #model: WeakRef<Results>;
   date: Dayjs;
 
-  constructor(private readonly data: ResultJSON, model: Results) {
+  constructor(private data: ResultJSON, model: Results) {
     this.#model = new WeakRef(model);
     this.date = dayjs(data.date);
 
-    makeObservable(this, {
+    makeObservable<Result, 'data'>(this, {
+      data: observable,
       date: observable,
+      equipment: computed,
     });
   }
 
@@ -32,6 +35,36 @@ class Result {
 
   get result() {
     return this.data.result;
+  }
+
+  get equipment(): Equipment {
+    return {
+      fingerPaddle: this.data.fingerPaddle,
+      handPaddle: this.data.handPaddle,
+      pullBuoy: this.data.pullBuoy,
+      board: this.data.board,
+      wetsuit: this.data.wetsuit,
+      breakBelt: this.data.breakBelt,
+      snorkel: this.data.snorkel,
+      swimfin: this.data.swimfin,
+      monofin: this.data.monofin,
+    };
+  }
+
+  readonly updateEquipment = async (eq: Equipment) => {
+    let same = true;
+    for (const [key, value] of Object.entries(this.equipment)) {
+      if (eq[key] !== value) {
+        same = false;
+      }
+    }
+    if (same) {
+      return;
+    }
+    const saved = await setResultEquipment(this.id, eq);
+    runInAction(() => {
+      Object.assign(this.data, saved);
+    });
   }
 
   get distance() {

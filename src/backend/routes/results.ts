@@ -348,6 +348,69 @@ export function resultsRoutes(db: Db, authConfig: AuthConfig | null) {
     }
   });
 
+  app.put('/:id/equipment', async (c) => {
+    const auth = await resolveNonSwimmerUser(c, authConfig, db);
+    if (!auth.ok) {
+      return c.json({ error: auth.error }, auth.status);
+    }
+
+    const id = Number(c.req.param('id'));
+    if (!Number.isInteger(id) || id < 1) {
+      return c.json({ error: 'Invalid id' }, 400);
+    }
+
+    const existing = db
+      .prepare(`SELECT id FROM result WHERE id = ?`)
+      .get(id) as { id: number } | undefined;
+    if (!existing) return c.json({ error: 'Not found' }, 404);
+
+    let body: unknown;
+    try {
+      body = await c.req.json();
+    } catch {
+      return c.json({ error: 'Invalid JSON body' }, 400);
+    }
+
+    if (typeof body !== 'object' || body === null) {
+      return c.json({ error: 'Invalid JSON body' }, 400);
+    }
+
+    const equipment = parseEquipment(body as Record<string, unknown>);
+    if (typeof equipment === 'string') {
+      return c.json({ error: equipment }, 400);
+    }
+
+    try {
+      db.prepare(`
+        UPDATE result SET
+          swimfin = ?,
+          finger_paddle = ?,
+          hand_paddle = ?,
+          pull_buoy = ?,
+          board = ?,
+          break_belt = ?,
+          snorkel = ?,
+          wetsuit = ?,
+          monofin = ?
+        WHERE id = ?
+      `).run(
+        equipment.swimfin ? 1 : 0,
+        equipment.fingerPaddle ? 1 : 0,
+        equipment.handPaddle ? 1 : 0,
+        equipment.pullBuoy ? 1 : 0,
+        equipment.board ? 1 : 0,
+        equipment.breakBelt ? 1 : 0,
+        equipment.snorkel ? 1 : 0,
+        equipment.wetsuit ? 1 : 0,
+        equipment.monofin ? 1 : 0,
+        id,
+      );
+      return c.json(equipment);
+    } catch (e) {
+      return c.json({ error: e instanceof Error ? e.message : 'Update failed' }, 500);
+    }
+  });
+
   app.get('/:id', (c) => {
     const id = Number(c.req.param('id'));
     if (!Number.isInteger(id) || id < 1) return c.json({ error: 'Invalid id' }, 400);

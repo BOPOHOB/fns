@@ -17,6 +17,7 @@ import cn from './swimmer.module.less';
 const NAME_SAVE_DEBOUNCE_MS = 2000;
 
 const Swimmer = observer(() => {
+  console.log('repaint');
   const swimmer = useSwimmer();
   const results = useResults();
   const session = useSession();

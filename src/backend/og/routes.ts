@@ -32,15 +32,81 @@ export function ogRoutes(db: Db) {
     if (!swimmer) return c.json({ error: "Swimmer not found" }, 404);
 
     const result = mapResult(row);
+
+    let seriesMeta:
+      | {
+        repetitions: number;
+        regime: number | null;
+        speed: number | null;
+        reps: Array<{
+          result: number;
+          distance: number;
+          stages: typeof result.stages;
+        }>;
+      }
+      | undefined;
+
+    if (result.seriesId != null) {
+      const seriesRow = db
+        .prepare(
+          `SELECT id, date, regime, speed, repetitions FROM result_series WHERE id = ?`,
+        )
+        .get(result.seriesId) as
+        | {
+          id: number;
+          date: string;
+          regime: number | null;
+          speed: number | null;
+          repetitions: number;
+        }
+        | undefined;
+
+      const seriesRows = db
+        .prepare(
+          `${RESULT_SELECT} WHERE series_id = ? ORDER BY date ASC, id ASC`,
+        )
+        .all(result.seriesId) as ResultRow[];
+
+      const reps = seriesRows.map((r) => {
+        const mapped = mapResult(r);
+        return {
+          result: mapped.result,
+          distance: mapped.distance,
+          stages: mapped.stages,
+        };
+      });
+
+      if (reps.length > 1) {
+        seriesMeta = {
+          repetitions: seriesRow?.repetitions ?? reps.length,
+          regime: seriesRow?.regime ?? null,
+          speed: seriesRow?.speed ?? null,
+          reps,
+        };
+      }
+    }
+
+    const displayResult = seriesMeta
+      ? seriesMeta.reps.reduce((sum, r) => sum + r.result, 0) /
+        seriesMeta.reps.length
+      : result.result;
+
     const fingerprint = [
-      "v3",
+      "v13",
       result.id,
       result.result,
       result.distance,
       result.date,
+      result.stroke ?? "",
       JSON.stringify(result.stages),
       swimmer.name,
       JSON.stringify(STAGE_CHUNK_LENGTH),
+      seriesMeta
+        ? JSON.stringify({
+          id: result.seriesId,
+          reps: seriesMeta.reps.map((r) => [r.result, r.distance, r.stages]),
+        })
+        : "",
     ].join("|");
     const cacheKey = `result-${id}-${simpleHash(fingerprint)}.png`;
 
@@ -49,9 +115,11 @@ export function ogRoutes(db: Db) {
         buildResultOgSvg({
           swimmerName: swimmer.name,
           distance: result.distance,
-          result: result.result,
+          result: displayResult,
           date: result.date,
           stages: result.stages,
+          stroke: result.stroke,
+          series: seriesMeta,
         }),
       );
 

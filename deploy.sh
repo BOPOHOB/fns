@@ -29,7 +29,7 @@ echo "==> Building frontend (client + SSR)…"
 npm run build
 
 echo "==> Preparing remote directories…"
-ssh "$REMOTE" "mkdir -p ${REMOTE_DIR}/dist ${REMOTE_DIR}/src"
+ssh "$REMOTE" "mkdir -p ${REMOTE_DIR}/dist ${REMOTE_DIR}/src ${REMOTE_DIR}/src/components/stroke/icons"
 
 echo "==> Uploading to ${REMOTE}:${REMOTE_DIR}…"
 rsync -az --delete dist/ "${REMOTE}:${REMOTE_DIR}/dist/"
@@ -40,12 +40,16 @@ rsync -az --delete src/sql/ "${REMOTE}:${REMOTE_DIR}/src/sql/"
 # Явно ещё раз OG-модули (Deno читает их с диска; без этого легко остаться на старой вёрстке)
 rsync -az src/shared/stagesLayout.ts "${REMOTE}:${REMOTE_DIR}/src/shared/stagesLayout.ts"
 rsync -az --delete src/backend/og/ "${REMOTE}:${REMOTE_DIR}/src/backend/og/"
+# Иконки стиля читаются с диска при рендере OG
+rsync -az --delete src/components/stroke/icons/ "${REMOTE}:${REMOTE_DIR}/src/components/stroke/icons/"
 scp deno.json deno.lock feelandswim.service feelAndSwim.ru "${REMOTE}:${REMOTE_DIR}/"
 
 echo "==> Verifying OG layout sources on remote…"
 ssh "$REMOTE" "grep -q 'STAGE_CHUNK_LENGTH' ${REMOTE_DIR}/src/shared/stagesLayout.ts \
   && test -f ${REMOTE_DIR}/src/backend/og/routes.ts \
-  && test -f ${REMOTE_DIR}/src/backend/og/resultCard.ts"
+  && test -f ${REMOTE_DIR}/src/backend/og/resultCard.ts \
+  && test -f ${REMOTE_DIR}/src/backend/og/strokeIcon.ts \
+  && test -f ${REMOTE_DIR}/src/components/stroke/icons/freestyle.svg"
 
 # Production env on the server (do not commit)
 ssh "$REMOTE" "cat > ${REMOTE_DIR}/.env" <<EOF
